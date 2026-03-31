@@ -8,122 +8,94 @@
             --primary: #346739; --secondary: #79AE6F; --light-green: #9FCB98;
             --danger: #e74c3c; --dark: #1e3a1f; --warning: #f1c40f; 
         }
-        
         body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f4; margin: 0; padding: 0; }
-        
-        /* AUTH PAGE */
-        .auth-container { max-width: 450px; margin: 60px auto; background: white; padding: 35px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-top: 5px solid var(--primary); }
-        .auth-container h2 { text-align: center; color: var(--primary); margin-top: 0; margin-bottom: 5px; }
-        .auth-container input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
-        
-        /* APP LAYOUT */
+        .auth-container { max-width: 400px; margin: 80px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-top: 5px solid var(--primary); }
         .main-app { display: none; padding: 20px; }
-        .container { max-width: 1400px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .container { max-width: 1300px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
         
-        /* TAB SYSTEM */
-        .tab-menu { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--light-green); padding-bottom: 10px; overflow-x: auto; }
-        .tab-btn { padding: 12px 25px; border: none; background: #eee; cursor: pointer; border-radius: 8px; font-weight: bold; color: #666; transition: 0.3s; white-space: nowrap; text-transform: uppercase; font-size: 13px; }
+        /* Tab Styling */
+        .tab-menu { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--light-green); padding-bottom: 10px; }
+        .tab-btn { padding: 12px 20px; border: none; background: #eee; cursor: pointer; border-radius: 8px; font-weight: bold; color: #666; transition: 0.3s; text-transform: uppercase; font-size: 12px; }
         .tab-btn.active { background: var(--primary); color: white; }
+        .tab-btn#tabAdmin { background: var(--danger); color: white; display: none; }
+        
         .page-content { display: none; }
         .page-content.active { display: block; }
-
-        .section-box { background: #ffffff; padding: 20px; border-radius: 10px; border: 1px solid var(--light-green); margin-bottom: 25px; }
+        .section-box { background: white; padding: 20px; border-radius: 10px; border: 1px solid var(--light-green); margin-bottom: 20px; }
         
-        .mcu-form { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; align-items: end; }
-        .input-group { display: flex; flex-direction: column; gap: 5px; }
-        .input-group label { font-size: 12px; font-weight: bold; color: var(--primary); margin-left: 2px; }
-        input, select, button { padding: 12px; border: 1px solid #ced4da; border-radius: 8px; font-size: 14px; }
-        
+        /* Form & Table */
+        .mcu-form { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        input, select, button { padding: 12px; border: 1px solid #ddd; border-radius: 8px; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { background-color: var(--primary); color: white; padding: 12px; text-align: left; font-size: 13px; }
-        td { border-bottom: 1px solid #edf2ed; padding: 12px; font-size: 13px; }
-
-        .blur-text { filter: blur(6px); user-select: none; background: #eee; border-radius: 4px; pointer-events: none; }
-        .badge { padding: 6px 10px; border-radius: 5px; font-size: 11px; font-weight: bold; color: white; text-transform: uppercase; }
-        .fit { background: #27ae60; } .note { background: #f39c12; } .unfit { background: #c0392b; } .wait { background: #95a5a6; }
-
-        .btn { cursor: pointer; border: none; font-weight: bold; color: white; padding: 10px 15px; border-radius: 8px; transition: 0.2s; }
-        .btn-primary { background-color: var(--primary); }
-        .btn-success { background-color: var(--secondary); }
-        .btn-danger { background-color: var(--danger); }
-        .btn-warning { background-color: var(--warning); color: #333; }
-        .btn-sm { padding: 6px 10px; font-size: 12px; }
-
-        @media print { .no-print { display: none !important; } .blur-text { filter: none !important; } }
+        th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 13px; }
+        td { border-bottom: 1px solid #eee; padding: 12px; font-size: 13px; }
+        
+        .badge { padding: 5px 10px; border-radius: 4px; color: white; font-size: 11px; font-weight: bold; }
+        .blur-text { filter: blur(5px); user-select: none; }
+        .btn-sm { padding: 5px 10px; font-size: 11px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div id="authPage" class="auth-container">
-    <h2>Login Medical</h2>
-    <p style="text-align:center; font-size:12px; color: #666; margin-bottom:20px;">LPK YONASINDO INTRA PRATAMA</p>
-    
+    <h2 style="text-align:center; color:var(--primary)">Login Medical</h2>
     <div id="loginForm">
-        <input type="text" id="uName" placeholder="Username">
-        <input type="password" id="uPass" placeholder="Password">
-        <button class="btn btn-primary" style="width: 100%; margin-top:10px;" onclick="doLogin()">MASUK KE SISTEM</button>
+        <input type="text" id="uName" placeholder="Username" style="width:100%; margin-bottom:10px; box-sizing:border-box">
+        <input type="password" id="uPass" placeholder="Password" style="width:100%; margin-bottom:15px; box-sizing:border-box">
+        <button class="tab-btn active" style="width:100%" onclick="doLogin()">MASUK KE SISTEM</button>
     </div>
-
-    <div id="registerForm" style="display:none;">
-        <input type="text" id="regFullName" placeholder="Nama Lengkap">
-        <input type="text" id="regEmail" placeholder="Email">
-        <input type="text" id="regPhone" placeholder="Nomor HP">
-        <input type="text" id="regUser" placeholder="Username Baru">
-        <input type="password" id="regPass" placeholder="Password Baru">
-        <button class="btn btn-success" style="width: 100%; margin-top: 10px;" onclick="doRegister()">DAFTAR SEKARANG</button>
+    <div style="text-align:center; margin-top:15px; font-size:13px">
+        <a href="javascript:void(0)" onclick="toggleAuth()" id="switchLink" style="color:var(--primary)">Buat Akun Siswa</a>
     </div>
-    <div style="text-align: center; margin-top: 20px;"><a href="javascript:void(0)" onclick="toggleAuth()" id="switchLink" style="color:var(--primary); font-weight:bold; text-decoration:none">Buat Akun Siswa</a></div>
+    <div id="registerForm" style="display:none; margin-top:15px">
+        <input type="text" id="regFullName" placeholder="Nama Lengkap" style="width:100%; margin-bottom:10px; box-sizing:border-box">
+        <input type="text" id="regUser" placeholder="Username Baru" style="width:100%; margin-bottom:10px; box-sizing:border-box">
+        <input type="password" id="regPass" placeholder="Password Baru" style="width:100%; margin-bottom:10px; box-sizing:border-box">
+        <button class="tab-btn" style="width:100%; background:var(--secondary); color:white" onclick="doRegister()">DAFTAR</button>
+    </div>
 </div>
 
 <div id="appPage" class="main-app">
     <div class="container">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px">
-            <h3 style="color:var(--primary); margin:0">SISTEM MEDICAL YONASINDO</h3>
-            <div><span id="displayUser" style="font-weight:bold; margin-right:10px;"></span><button class="btn" style="background:#95a5a6" onclick="logout()">LOGOUT</button></div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+            <h3 style="color:var(--primary); margin:0">MEDICAL YONASINDO</h3>
+            <div>
+                <span id="displayUser" style="font-weight:bold; margin-right:15px"></span>
+                <button onclick="logout()" style="background:#999; color:white; border:none; padding:5px 15px; border-radius:5px; cursor:pointer">LOGOUT</button>
+            </div>
         </div>
 
-        <div class="tab-menu no-print">
-            <button class="tab-btn active" id="tab1" onclick="openTab('pengajuan')">FORM MCU</button>
-            <button class="tab-btn" id="tab-status" onclick="openTab('status-saya')">PENGAJUAN SAYA</button>
-            <button class="tab-btn" id="tab2" onclick="openTab('hasil')">HASIL MCU</button>
-            <button class="tab-btn" id="tabAdmin" onclick="openTab('admin')" style="display:none; background: var(--danger); color: white;">DATABASE AKUN</button>
+        <div class="tab-menu" id="mainMenuBar">
+            <button class="tab-btn active" id="btn-pengajuan" onclick="openTab('pengajuan')">FORM MCU</button>
+            <button class="tab-btn" id="tab-status-saya" onclick="openTab('status-saya')">PENGAJUAN SAYA</button>
+            <button class="tab-btn" id="btn-hasil" onclick="openTab('hasil')">HASIL MCU</button>
+            <button class="tab-btn" id="tabAdmin" onclick="openTab('admin')">DATABASE AKUN</button>
         </div>
 
         <div id="page-pengajuan" class="page-content active">
             <div class="section-box">
                 <form id="formMcu" class="mcu-form">
-                    <div class="input-group"><label>Nama Lengkap</label><input type="text" id="nama" required></div>
-                    <div class="input-group"><label>Nomor HP</label><input type="text" id="noHp" required></div>
-                    <div class="input-group"><label>Tanggal Lahir</label><input type="date" id="tglLahir" required></div>
-                    <div class="input-group"><label>Nama Kumiai</label><input type="text" id="kumiai" required></div>
-                    <div class="input-group">
-                        <label>Pilih Klinik</label>
-                        <select id="klinik" required>
-                            <option value="" disabled selected>-- Pilih Klinik --</option>
-                            <option value="Klinik Galaxy Medical Center">Klinik Galaxy Medical Center</option>
-                            <option value="Klinik Rosela Indah Medikal Center">Klinik Rosela Indah Medikal Center</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label>Jenis MCU</label>
-                        <select id="tipeMcu" required>
-                            <option value="" disabled selected>-- Pilih Jenis MCU --</option>
-                            <option value="MCU PRA">MCU PRA</option>
-                            <option value="MCU FULL">MCU FULL</option>
-                            <option value="MCU AKHIR">MCU AKHIR</option>
-                        </select>
-                    </div>
-                    <div style="grid-column: span 3; text-align: right; margin-top: 10px;">
-                        <button type="submit" class="btn btn-primary" id="btnSubmitForm">SIMPAN PENGAJUAN</button>
-                        <button type="button" class="btn btn-danger" id="btnBatalEdit" style="display:none;" onclick="batalModeEdit()">BATAL EDIT</button>
-                    </div>
+                    <input type="text" id="nama" placeholder="Nama Lengkap" required>
+                    <input type="text" id="noHp" placeholder="No HP" required>
+                    <input type="text" id="kumiai" placeholder="Nama Kumiai" required>
+                    <select id="klinik" required>
+                        <option value="" disabled selected>Pilih Klinik</option>
+                        <option value="Klinik Galaxy Medical Center">Klinik Galaxy Medical Center</option>
+                        <option value="Klinik Rosela Indah Medikal Center">Klinik Rosela Indah Medikal Center</option>
+                    </select>
+                    <select id="tipeMcu" required>
+                        <option value="" disabled selected>Jenis MCU</option>
+                        <option value="MCU PRA">MCU PRA</option>
+                        <option value="MCU FULL">MCU FULL</option>
+                        <option value="MCU AKHIR">MCU AKHIR</option>
+                    </select>
+                    <button type="submit" style="background:var(--primary); color:white; font-weight:bold">KIRIM PENGAJUAN</button>
                 </form>
             </div>
-            
-            <div id="adminApprovalUI" style="display:none">
-                <h4 style="color:var(--danger)">Antrean Pengajuan Masuk</h4>
+            <div id="adminQueue" style="display:none">
+                <h4 style="color:var(--danger)">Antrean Persetujuan (Admin)</h4>
                 <table>
-                    <thead><tr><th>Tgl Daftar</th><th>Nama</th><th>Klinik</th><th>Kumiai</th><th>Aksi</th></tr></thead>
+                    <thead><tr><th>Nama</th><th>Klinik</th><th>Kumiai</th><th>Aksi</th></tr></thead>
                     <tbody id="listPending"></tbody>
                 </table>
             </div>
@@ -131,17 +103,17 @@
 
         <div id="page-status-saya" class="page-content">
             <div class="section-box">
-                <h4 style="color:var(--primary)">Riwayat Pengajuan Saya</h4>
-                <div id="myStatusContent"></div>
+                <h4>Riwayat Pengajuan Anda</h4>
+                <div id="myStatusList"></div>
             </div>
         </div>
 
         <div id="page-hasil" class="page-content">
             <div class="section-box">
-                <h4 style="color:var(--primary)">Database Hasil MCU</h4>
-                <input type="text" id="search" placeholder="Cari Nama..." onkeyup="loadData()" style="width:100%; margin-bottom:15px">
+                <h4>Data Hasil MCU</h4>
+                <input type="text" id="search" placeholder="Cari nama..." onkeyup="loadData()" style="width:100%; margin-bottom:15px; box-sizing:border-box">
                 <table>
-                    <thead><tr><th>Approved</th><th>Tgl MCU</th><th>Nama</th><th>Klinik</th><th>Jenis</th><th>Hasil</th><th id="adminCol" style="display:none">Opsi</th></tr></thead>
+                    <thead><tr><th>Tgl MCU</th><th>Nama</th><th>Klinik</th><th>Hasil</th><th class="adm-col">Opsi</th></tr></thead>
                     <tbody id="listHasil"></tbody>
                 </table>
             </div>
@@ -149,10 +121,11 @@
 
         <div id="page-admin" class="page-content">
             <div class="section-box">
-                <h4 style="color:var(--danger)">Database Akun Terdaftar</h4>
-                <table>
-                    <thead><tr><th>Nama</th><th>Email</th><th>No. HP</th><th>Username</th><th>Aksi</th></tr></thead>
-                    <tbody id="listUser"></tbody>
+                <h4>Database User</h4>
+                <tbody id="listUser"></tbody>
+                <table id="userTable">
+                    <thead><tr><th>Nama</th><th>Username</th><th>Aksi</th></tr></thead>
+                    <tbody id="tbodyUser"></tbody>
                 </table>
             </div>
         </div>
@@ -160,26 +133,12 @@
 </div>
 
 <script>
-    const DB_USERS = "YONASINDO_USERS_DATABASE";
-    const DB_RECORDS = "YONASINDO_RECORDS_DATABASE";
-    const DB_SESSION = "YONASINDO_ACTIVE_SESSION";
     const ADMIN_CRED = { user: "adminmcuyonasindo", pass: "adminmcuyonasindo" };
+    let users = JSON.parse(localStorage.getItem("Y_USERS")) || [];
+    let records = JSON.parse(localStorage.getItem("Y_RECORDS")) || [];
+    let currentUser = JSON.parse(localStorage.getItem("Y_SESSION")) || null;
 
-    let users = JSON.parse(localStorage.getItem(DB_USERS)) || [];
-    let records = JSON.parse(localStorage.getItem(DB_RECORDS)) || [];
-    let currentUser = null;
-    let currentEditId = null;
-
-    (function() {
-        const saved = localStorage.getItem(DB_SESSION);
-        if (saved) { currentUser = JSON.parse(saved); enterApp(); }
-    })();
-
-    function toggleAuth() {
-        const isLogin = document.getElementById('loginForm').style.display !== 'none';
-        document.getElementById('loginForm').style.display = isLogin ? 'none' : 'block';
-        document.getElementById('registerForm').style.display = isLogin ? 'block' : 'none';
-    }
+    if(currentUser) enterApp();
 
     function doLogin() {
         const u = document.getElementById('uName').value.trim();
@@ -187,16 +146,13 @@
 
         if(u === ADMIN_CRED.user && p === ADMIN_CRED.pass) {
             currentUser = { u: u, role: 'admin' };
-            localStorage.setItem(DB_SESSION, JSON.stringify(currentUser));
-            enterApp();
         } else {
             let found = users.find(x => x.u === u && x.p === p);
-            if(found) {
-                currentUser = { ...found, role: 'user' };
-                localStorage.setItem(DB_SESSION, JSON.stringify(currentUser));
-                enterApp();
-            } else alert("Login Gagal!");
+            if(found) currentUser = { ...found, role: 'user' };
+            else return alert("Salah Login!");
         }
+        localStorage.setItem("Y_SESSION", JSON.stringify(currentUser));
+        enterApp();
     }
 
     function enterApp() {
@@ -204,33 +160,28 @@
         document.getElementById('appPage').style.display = 'block';
         
         const isAdmin = currentUser.role === 'admin';
-        
-        // Identity Display
         const disp = document.getElementById('displayUser');
-        disp.innerText = isAdmin ? "ADMIN: " + currentUser.u.toUpperCase() : "USER: " + currentUser.u.toUpperCase();
-        disp.style.color = isAdmin ? "var(--danger)" : "var(--primary)";
+        disp.innerText = isAdmin ? "MODE: ADMIN" : "USER: " + currentUser.u.toUpperCase();
+        disp.style.color = isAdmin ? "red" : "green";
 
-        // Tab Control
-        document.getElementById('tab-status').style.display = isAdmin ? 'none' : 'block';
+        // PROTEKSI MENU ADMIN
+        document.getElementById('tab-status-saya').style.display = isAdmin ? 'none' : 'block';
         document.getElementById('tabAdmin').style.display = isAdmin ? 'block' : 'none';
-        document.getElementById('adminApprovalUI').style.display = isAdmin ? 'block' : 'none';
-        document.getElementById('adminCol').style.display = isAdmin ? 'table-cell' : 'none';
-
-        // Redirect Admin if on "Status Saya"
-        if(isAdmin) openTab('pengajuan');
+        document.getElementById('adminQueue').style.display = isAdmin ? 'block' : 'none';
         
+        document.querySelectorAll('.adm-col').forEach(c => c.style.display = isAdmin ? 'table-cell' : 'none');
+
+        if(isAdmin) openTab('pengajuan');
         loadData();
     }
 
-    function logout() { localStorage.removeItem(DB_SESSION); location.reload(); }
-
-    function openTab(name) {
-        document.querySelectorAll('.page-content, .tab-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById('page-' + name).classList.add('active');
-        if(name === 'pengajuan') document.getElementById('tab1').classList.add('active');
-        if(name === 'status-saya') document.getElementById('tab-status').classList.add('active');
-        if(name === 'hasil') document.getElementById('tab2').classList.add('active');
-        if(name === 'admin') document.getElementById('tabAdmin').classList.add('active');
+    function openTab(id) {
+        document.querySelectorAll('.page-content, .tab-btn').forEach(e => e.classList.remove('active'));
+        document.getElementById('page-' + id).classList.add('active');
+        if(id === 'pengajuan') document.getElementById('btn-pengajuan').classList.add('active');
+        if(id === 'status-saya') document.getElementById('tab-status-saya').classList.add('active');
+        if(id === 'hasil') document.getElementById('btn-hasil').classList.add('active');
+        if(id === 'admin') document.getElementById('tabAdmin').classList.add('active');
         loadData();
     }
 
@@ -238,75 +189,77 @@
         const isAdmin = currentUser.role === 'admin';
         const q = document.getElementById('search').value.toLowerCase();
 
-        // Admin Tables
+        // 1. Pending (Admin Only)
         if(isAdmin) {
-            const pending = records.filter(i => i.status === 'pending').sort((a,b) => b.timestamp - a.timestamp);
-            document.getElementById('listPending').innerHTML = pending.map(i => `<tr><td>${i.tglInput}</td><td>${i.nama}</td><td>${i.klinik}</td><td>${i.kumiai}</td><td><button class="btn btn-success btn-sm" onclick="approve(${i.id})">APPROVE</button></td></tr>`).join('');
+            const pnd = records.filter(r => r.status === 'pending');
+            document.getElementById('listPending').innerHTML = pnd.map(r => `<tr><td>${r.nama}</td><td>${r.klinik}</td><td>${r.kumiai}</td><td><button class="btn-sm" style="background:green;color:white" onclick="approve(${r.id})">Approve</button></td></tr>`).join('');
             
-            document.getElementById('listUser').innerHTML = users.map(u => `<tr><td>${u.name}</td><td>${u.email}</td><td>${u.phone}</td><td>${u.u}</td><td><button class="btn btn-danger btn-sm" onclick="hapusUser('${u.u}')">HAPUS</button></td></tr>`).join('');
+            document.getElementById('tbodyUser').innerHTML = users.map(u => `<tr><td>${u.name}</td><td>${u.u}</td><td><button onclick="hapusU('${u.u}')">Hapus</button></td></tr>`).join('');
         }
 
-        // User Status
+        // 2. My Status (User Only)
         if(!isAdmin) {
-            const myRecords = records.filter(i => i.owner === currentUser.u);
-            document.getElementById('myStatusContent').innerHTML = myRecords.length === 0 ? "Belum ada data" : `<table><thead><tr><th>Tgl</th><th>Klinik</th><th>Status</th></tr></thead><tbody>` + myRecords.map(i => `<tr><td>${i.tglInput}</td><td>${i.klinik}</td><td>${i.status}</td></tr>`).join('') + `</tbody></table>`;
+            const mine = records.filter(r => r.owner === currentUser.u);
+            document.getElementById('myStatusList').innerHTML = mine.length ? mine.map(m => `<div style="border-bottom:1px solid #eee; padding:10px"><b>${m.klinik}</b> - Status: ${m.status.toUpperCase()}</div>`).join('') : "Belum ada pengajuan.";
         }
 
-        // Global Hasil
-        let approved = records.filter(i => i.status === 'approved' && i.nama.toLowerCase().includes(q));
-        document.getElementById('listHasil').innerHTML = approved.map(i => {
-            const isMe = i.owner === currentUser.u || isAdmin;
-            const blur = isMe ? '' : 'blur-text';
-            return `<tr><td>${i.tglApp}</td><td>${i.tglMcu}</td><td>${i.nama}</td><td>${i.klinik}</td><td>${i.tipe}</td><td><span class="badge ${blur}">${i.hasil}</span></td><td style="${isAdmin?'':'display:none'}"><button class="btn btn-success btn-sm" onclick="setHasil(${i.id})">SET HASIL</button></td></tr>`;
+        // 3. Hasil (Global)
+        const apprv = records.filter(r => r.status === 'approved' && r.nama.toLowerCase().includes(q));
+        document.getElementById('listHasil').innerHTML = apprv.map(r => {
+            const blur = (isAdmin || r.owner === currentUser.u) ? '' : 'blur-text';
+            return `<tr><td>${r.tglMcu}</td><td>${r.nama}</td><td>${r.klinik}</td><td><span class="badge ${blur}" style="background:orange">${r.hasil}</span></td><td class="adm-col" style="${isAdmin?'':'display:none'}"><button onclick="setHasil(${r.id})">Hasil</button></td></tr>`;
         }).join('');
     }
 
-    // Fungsi Support (Daftar, Approve, dll tetap sama dengan perbaikan role)
     document.getElementById('formMcu').onsubmit = function(e) {
         e.preventDefault();
         records.push({
             id: Date.now(), owner: currentUser.u,
             nama: document.getElementById('nama').value,
             noHp: document.getElementById('noHp').value,
-            tglLahir: document.getElementById('tglLahir').value,
             kumiai: document.getElementById('kumiai').value,
             klinik: document.getElementById('klinik').value,
             tipe: document.getElementById('tipeMcu').value,
-            tglInput: new Date().toLocaleDateString('id-ID'),
-            timestamp: new Date().getTime(),
             status: 'pending', hasil: 'PROSES', tglMcu: '-'
         });
-        localStorage.setItem(DB_RECORDS, JSON.stringify(records));
-        alert("Berhasil!");
+        localStorage.setItem("Y_RECORDS", JSON.stringify(records));
+        alert("Berhasil dikirim!");
         this.reset();
-        openTab(currentUser.role === 'admin' ? 'pengajuan' : 'status-saya');
+        loadData();
     };
 
     function approve(id) {
-        const tgl = prompt("Tanggal MCU:"); if(!tgl) return;
-        const idx = records.findIndex(i => i.id === id);
-        records[idx].status = 'approved'; records[idx].tglMcu = tgl; records[idx].tglApp = new Date().toLocaleDateString('id-ID');
-        localStorage.setItem(DB_RECORDS, JSON.stringify(records)); loadData();
+        const t = prompt("Masukkan Tanggal MCU (Contoh: 12/03/2024):");
+        if(!t) return;
+        const i = records.findIndex(x => x.id === id);
+        records[i].status = 'approved';
+        records[i].tglMcu = t;
+        localStorage.setItem("Y_RECORDS", JSON.stringify(records));
+        loadData();
     }
 
     function setHasil(id) {
         const h = prompt("1:Fit, 2:Note, 3:Unfit");
-        const idx = records.findIndex(i => i.id === id);
-        if(h==='1') records[idx].hasil = 'Fit to Work';
-        else if(h==='2') records[idx].hasil = 'Fit with Note';
-        else if(h==='3') records[idx].hasil = 'Unfit';
-        localStorage.setItem(DB_RECORDS, JSON.stringify(records)); loadData();
+        const i = records.findIndex(x => x.id === id);
+        if(h==='1') records[i].hasil = "FIT";
+        if(h==='2') records[i].hasil = "FIT WITH NOTE";
+        if(h==='3') records[i].hasil = "UNFIT";
+        localStorage.setItem("Y_RECORDS", JSON.stringify(records));
+        loadData();
+    }
+
+    function toggleAuth() {
+        const rf = document.getElementById('registerForm');
+        rf.style.display = rf.style.display === 'none' ? 'block' : 'none';
     }
 
     function doRegister() {
-        const u = document.getElementById('regUser').value;
-        const p = document.getElementById('regPass').value;
-        const n = document.getElementById('regFullName').value;
-        users.push({u, p, name: n, email: document.getElementById('regEmail').value, phone: document.getElementById('regPhone').value});
-        localStorage.setItem(DB_USERS, JSON.stringify(users)); alert("Sukses!"); toggleAuth();
+        users.push({ u: document.getElementById('regUser').value, p: document.getElementById('regPass').value, name: document.getElementById('regFullName').value });
+        localStorage.setItem("Y_USERS", JSON.stringify(users));
+        alert("Berhasil Daftar!"); location.reload();
     }
-    
-    function hapusUser(un) { if(confirm("Hapus?")) { users = users.filter(x=>x.u!==un); localStorage.setItem(DB_USERS, JSON.stringify(users)); loadData(); }}
+
+    function logout() { localStorage.removeItem("Y_SESSION"); location.reload(); }
 </script>
 </body>
 </html>
