@@ -311,6 +311,34 @@
 
     function logout() { localStorage.removeItem("Y_SESSION"); location.reload(); }
     function hapusU(un) { if(confirm("Hapus akun " + un + "?")) { users = users.filter(x => x.u !== un); localStorage.setItem("Y_USERS", JSON.stringify(users)); loadData(); } }
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQYBpd8PtZwdHBl5s2CaQOkwN6RC1e_feVrGFae87Ug7qhncasW6YyEa5ItuevAoT1Pg/exec"; 
+
+async function loadDataOnline() {
+    // Ambil Data Siswa
+    const resUsers = await fetch(SCRIPT_URL + "?action=readUsers");
+    const dataUsers = await resUsers.json();
+    // Proses dataUsers ke variabel 'users' di kode Anda
+    
+    // Ambil Data MCU
+    const resRec = await fetch(SCRIPT_URL + "?action=readRecords");
+    const dataRec = await resRec.json();
+    // Proses dataRec ke variabel 'records' di kode Anda
+    
+    loadData(); // Jalankan fungsi render tabel yang sudah ada
+}
+
+async function simpanMcuOnline(dataBaru) {
+    await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({
+            table: "records",
+            action: "insert",
+            data: Object.values(dataBaru)
+        })
+    });
+    alert("Data Terkirim ke Cloud!");
+    loadDataOnline();
+}
 </script>
 </body>
 </html>
