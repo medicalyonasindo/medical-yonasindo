@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Divisi Medical - LPK Yonasindo Intra Pratama</title>
     <style>
         :root { 
@@ -9,65 +10,76 @@
             --danger: #e74c3c; --dark: #1e3a1f; --warning: #f1c40f; 
         }
         body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f4; margin: 0; padding: 0; }
-        .auth-container { max-width: 400px; margin: 80px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-top: 5px solid var(--primary); }
-        .main-app { display: none; padding: 20px; }
-        .container { max-width: 1300px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
         
-        /* Tab Styling */
-        .tab-menu { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--light-green); padding-bottom: 10px; }
-        .tab-btn { padding: 12px 20px; border: none; background: #eee; cursor: pointer; border-radius: 8px; font-weight: bold; color: #666; transition: 0.3s; text-transform: uppercase; font-size: 12px; }
+        /* Auth Page */
+        .auth-container { max-width: 400px; margin: 50px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-top: 5px solid var(--primary); }
+        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 9999; justify-content: center; align-items: center; font-weight: bold; color: var(--primary); }
+
+        /* Layout */
+        .main-app { display: none; padding: 15px; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        
+        /* Navigation */
+        .tab-menu { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid var(--light-green); padding-bottom: 10px; overflow-x: auto; }
+        .tab-btn { padding: 10px 18px; border: none; background: #eee; cursor: pointer; border-radius: 6px; font-weight: bold; color: #666; white-space: nowrap; font-size: 12px; }
         .tab-btn.active { background: var(--primary); color: white; }
         .tab-btn#tabAdmin { background: var(--danger); color: white; }
-        
+
+        /* UI Elements */
         .page-content { display: none; }
         .page-content.active { display: block; }
-        .section-box { background: white; padding: 20px; border-radius: 10px; border: 1px solid var(--light-green); margin-bottom: 20px; }
-        
-        input, select, button { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .section-box { background: white; padding: 15px; border-radius: 10px; border: 1px solid var(--light-green); margin-bottom: 20px; }
+        input, select, button { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 600px; }
         th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 13px; }
-        td { border-bottom: 1px solid #eee; padding: 12px; font-size: 13px; }
+        td { border-bottom: 1px solid #eee; padding: 10px; font-size: 13px; }
+        .badge { padding: 4px 8px; border-radius: 4px; color: white; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        .blur-text { filter: blur(5px); opacity: 0.4; user-select: none; }
+        .btn-sm { padding: 6px 10px; font-size: 11px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; color: white; }
         
-        .badge { padding: 5px 10px; border-radius: 4px; color: white; font-size: 11px; font-weight: bold; display: inline-block; }
-        .blur-text { filter: blur(5px); user-select: none; opacity: 0.5; }
-        .btn-sm { padding: 6px 12px; font-size: 11px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; }
-        
-        .btn-green { background: #27ae60; color: white; }
-        .btn-blue { background: #2980b9; color: white; }
-        .btn-orange { background: #f39c12; color: white; }
+        @media (max-width: 600px) {
+            .mcu-form { grid-template-columns: 1fr !important; }
+            th, td { font-size: 11px; padding: 8px; }
+        }
     </style>
 </head>
 <body>
 
+<div id="loader" class="loading-overlay">Mohon Tunggu...</div>
+
 <div id="authPage" class="auth-container">
-    <h2 style="text-align:center; color:var(--primary)">Login Medical</h2>
+    <h2 style="text-align:center; color:var(--primary); margin-bottom:5px;">Medical Login</h2>
+    <p style="text-align:center; font-size:12px; color:#666; margin-bottom:25px;">LPK Yonasindo Intra Pratama</p>
+    
     <div id="loginForm">
-        <input type="text" id="uName" placeholder="Username" style="width:100%; margin-bottom:10px; box-sizing:border-box">
-        <input type="password" id="uPass" placeholder="Password" style="width:100%; margin-bottom:15px; box-sizing:border-box">
-        <button class="tab-btn active" style="width:100%" onclick="doLogin()">MASUK KE SISTEM</button>
+        <input type="text" id="uName" placeholder="Username" style="width:100%; margin-bottom:12px;">
+        <input type="password" id="uPass" placeholder="Password" style="width:100%; margin-bottom:15px;">
+        <button class="tab-btn active" style="width:100%; font-size:14px;" onclick="doLogin()">MASUK</button>
     </div>
-    <div style="text-align:center; margin-top:15px; font-size:13px">
-        <a href="javascript:void(0)" onclick="toggleAuth()" id="switchLink" style="color:var(--primary)">Buat Akun Siswa</a>
-    </div>
+
     <div id="registerForm" style="display:none; margin-top:15px">
-        <input type="text" id="regFullName" placeholder="Nama Lengkap" style="width:100%; margin-bottom:10px; box-sizing:border-box">
-        <input type="text" id="regUser" placeholder="Username Baru" style="width:100%; margin-bottom:10px; box-sizing:border-box">
-        <input type="password" id="regPass" placeholder="Password Baru" style="width:100%; margin-bottom:10px; box-sizing:border-box">
+        <input type="text" id="regFullName" placeholder="Nama Lengkap" style="width:100%; margin-bottom:10px;">
+        <input type="text" id="regUser" placeholder="Username Baru" style="width:100%; margin-bottom:10px;">
+        <input type="password" id="regPass" placeholder="Password Baru" style="width:100%; margin-bottom:10px;">
         <button class="tab-btn" style="width:100%; background:var(--secondary); color:white" onclick="doRegister()">DAFTAR AKUN</button>
+    </div>
+    
+    <div style="text-align:center; margin-top:20px; font-size:13px">
+        <a href="javascript:void(0)" onclick="toggleAuth()" id="switchLink" style="color:var(--primary); font-weight:bold; text-decoration:none">Buat Akun Siswa</a>
     </div>
 </div>
 
 <div id="appPage" class="main-app">
     <div class="container">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
-            <h3 style="color:var(--primary); margin:0">SISTEM MEDICAL YONASINDO</h3>
+            <h3 style="color:var(--primary); margin:0">MCU CLOUD</h3>
             <div>
-                <span id="displayUser" style="font-weight:bold; margin-right:15px"></span>
-                <button onclick="logout()" style="background:#999; color:white; border:none; padding:5px 15px; border-radius:5px; cursor:pointer">LOGOUT</button>
+                <span id="displayUser" style="font-weight:bold; margin-right:15px; font-size:13px"></span>
+                <button onclick="logout()" style="background:#999; color:white; border:none; padding:6px 12px; border-radius:5px; cursor:pointer; font-size:11px">LOGOUT</button>
             </div>
         </div>
 
-        <div class="tab-menu" id="mainMenuBar">
+        <div class="tab-menu">
             <button class="tab-btn active" id="btn-pengajuan" onclick="openTab('pengajuan')">FORM MCU</button>
             <button class="tab-btn" id="btn-status-saya" onclick="openTab('status-saya')">PENGAJUAN SAYA</button>
             <button class="tab-btn" id="btn-hasil" onclick="openTab('hasil')">HASIL MCU</button>
@@ -78,7 +90,7 @@
             <div class="section-box">
                 <form id="formMcu" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
                     <input type="text" id="nama" placeholder="Nama Lengkap" required>
-                    <input type="text" id="noHp" placeholder="No HP" required>
+                    <input type="text" id="noHp" placeholder="No HP (08xxx)" required>
                     <input type="text" id="kumiai" placeholder="Nama Kumiai" required>
                     <select id="klinik" required>
                         <option value="" disabled selected>Pilih Klinik</option>
@@ -91,95 +103,231 @@
                         <option value="MCU FULL">MCU FULL</option>
                         <option value="MCU AKHIR">MCU AKHIR</option>
                     </select>
-                    <button type="submit" style="background:var(--primary); color:white; font-weight:bold; cursor:pointer">KIRIM PENGAJUAN</button>
+                    <button type="submit" style="background:var(--primary); color:white; font-weight:bold; cursor:pointer">KIRIM KE CLOUD</button>
                 </form>
             </div>
             <div id="adminQueue" style="display:none">
-                <h4 style="color:var(--danger)">Antrean Persetujuan</h4>
-                <table>
-                    <thead><tr><th>Nama</th><th>Klinik</th><th>Kumiai</th><th>Aksi</th></tr></thead>
-                    <tbody id="listPending"></tbody>
-                </table>
+                <h4 style="color:var(--danger)">Antrean Persetujuan Admin</h4>
+                <div style="overflow-x:auto">
+                    <table>
+                        <thead><tr><th>Nama</th><th>Klinik</th><th>Kumiai</th><th>Aksi</th></tr></thead>
+                        <tbody id="listPending"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
         <div id="page-status-saya" class="page-content">
             <div class="section-box">
-                <h4>Status Pengajuan Saya</h4>
-                <div id="myStatusList"></div>
+                <h4>Status Pengajuan Saya (Real-time)</h4>
+                <div id="myStatusList" style="overflow-x:auto"></div>
             </div>
         </div>
 
         <div id="page-hasil" class="page-content">
             <div class="section-box">
-                <h4>Database Hasil Medical Check-up</h4>
-                <input type="text" id="search" placeholder="Cari nama siswa..." onkeyup="loadData()" style="width:100%; margin-bottom:15px; box-sizing:border-box">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Tgl MCU</th>
-                            <th>Nama</th>
-                            <th>Klinik</th>
-                            <th>Hasil</th>
-                            <th id="th-admin-opsi" style="display:none">Opsi Admin</th>
-                        </tr>
-                    </thead>
-                    <tbody id="listHasil"></tbody>
-                </table>
+                <h4>Database Hasil MCU</h4>
+                <input type="text" id="search" placeholder="Cari nama siswa..." onkeyup="renderTables()" style="width:100%; margin-bottom:15px;">
+                <div style="overflow-x:auto">
+                    <table>
+                        <thead>
+                            <tr><th>Tgl MCU</th><th>Nama</th><th>Klinik</th><th>Hasil</th><th class="adm-only" style="display:none">Opsi</th></tr>
+                        </thead>
+                        <tbody id="listHasil"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
         <div id="page-admin" class="page-content">
             <div class="section-box">
-                <h4>Database Semua Akun Siswa</h4>
-                <table>
-                    <thead><tr><th>Nama</th><th>Username</th><th>Password</th><th>Aksi</th></tr></thead>
-                    <tbody id="tbodyUser"></tbody>
-                </table>
+                <h4>Database Akun Terdaftar</h4>
+                <div style="overflow-x:auto">
+                    <table>
+                        <thead><tr><th>Nama</th><th>User</th><th>Pass</th><th>Aksi</th></tr></thead>
+                        <tbody id="tbodyUser"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    const ADMIN_CRED = { user: "adminmcuyonasindo", pass: "adminmcuyonasindo" };
-    let users = JSON.parse(localStorage.getItem("Y_USERS")) || [];
-    let records = JSON.parse(localStorage.getItem("Y_RECORDS")) || [];
+    // KONFIGURASI DATABASE
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQYBpd8PtZwdHBl5s2CaQOkwN6RC1e_feVrGFae87Ug7qhncasW6YyEa5ItuevAoT1Pg/exec";
+    const ADMIN_USER = "adminmcuyonasindo";
+    const ADMIN_PASS = "adminmcuyonasindo";
+
+    let users = [];
+    let records = [];
     let currentUser = JSON.parse(localStorage.getItem("Y_SESSION")) || null;
 
-    if(currentUser) enterApp();
+    // Inisialisasi
+    if(currentUser) {
+        enterApp();
+        syncData();
+    }
 
-    function doLogin() {
+    function showLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
+
+    async function syncData() {
+        showLoader(true);
+        try {
+            const resU = await fetch(SCRIPT_URL + "?action=readUsers");
+            const rawU = await resU.json();
+            users = rawU.map(u => ({ name: u[0], u: u[1], p: u[2], email: u[3], phone: u[4] }));
+
+            const resR = await fetch(SCRIPT_URL + "?action=readRecords");
+            const rawR = await resR.json();
+            records = rawR.map(r => ({
+                id: r[0], owner: r[1], nama: r[2], noHp: r[3], kumiai: r[4], 
+                klinik: r[5], tipe: r[6], status: r[7], hasil: r[8], 
+                tglMcu: r[9], tglInput: r[10], timestamp: r[11]
+            }));
+            renderTables();
+        } catch(e) { console.error("Gagal sinkron:", e); }
+        showLoader(false);
+    }
+
+    async function doLogin() {
         const u = document.getElementById('uName').value.trim();
         const p = document.getElementById('uPass').value.trim();
-        if(u === ADMIN_CRED.user && p === ADMIN_CRED.pass) {
-            currentUser = { u: u, role: 'admin' };
+        
+        showLoader(true);
+        // Cek Admin
+        if(u === ADMIN_USER && p === ADMIN_PASS) {
+            currentUser = { u, role: 'admin' };
         } else {
-            let found = users.find(x => x.u === u && x.p === p);
-            if(found) currentUser = { ...found, role: 'user' };
-            else return alert("Username atau Password Salah!");
+            // Re-sync users to ensure latest
+            const resU = await fetch(SCRIPT_URL + "?action=readUsers");
+            const rawU = await resU.json();
+            const found = rawU.find(x => x[1] == u && x[2] == p);
+            if(found) currentUser = { u, role: 'user' };
+            else { showLoader(false); return alert("Username/Password Salah!"); }
         }
+        
         localStorage.setItem("Y_SESSION", JSON.stringify(currentUser));
         enterApp();
+        syncData();
     }
 
     function enterApp() {
         document.getElementById('authPage').style.display = 'none';
         document.getElementById('appPage').style.display = 'block';
-        const isAdmin = (currentUser.role === 'admin');
+        const isAdmin = currentUser.role === 'admin';
         
-        const disp = document.getElementById('displayUser');
-        disp.innerText = isAdmin ? "AKUN: ADMIN" : "SISWA: " + currentUser.u.toUpperCase();
-        disp.style.color = isAdmin ? "var(--danger)" : "var(--primary)";
-
-        // Menu Visibility
+        document.getElementById('displayUser').innerText = isAdmin ? "ADMIN" : "SISWA: " + currentUser.u.toUpperCase();
         document.getElementById('btn-status-saya').style.display = isAdmin ? 'none' : 'block';
         document.getElementById('tabAdmin').style.display = isAdmin ? 'block' : 'none';
         document.getElementById('adminQueue').style.display = isAdmin ? 'block' : 'none';
-        document.getElementById('th-admin-opsi').style.display = isAdmin ? 'table-cell' : 'none';
+        document.querySelectorAll('.adm-only').forEach(el => el.style.display = isAdmin ? 'table-cell' : 'none');
 
         if(isAdmin) openTab('pengajuan');
-        loadData();
+    }
+
+    function renderTables() {
+        const isAdmin = currentUser.role === 'admin';
+        const q = document.getElementById('search').value.toLowerCase();
+
+        // Pending Admin
+        if(isAdmin) {
+            const pnd = records.filter(r => r.status === 'pending');
+            document.getElementById('listPending').innerHTML = pnd.map(r => `
+                <tr><td>${r.nama}</td><td>${r.klinik}</td><td>${r.kumiai}</td>
+                <td><button class="btn-sm" style="background:green" onclick="approve(${r.id})">APPROVE</button></td></tr>`).join('');
+            
+            document.getElementById('tbodyUser').innerHTML = users.map(u => `
+                <tr><td>${u.name}</td><td>${u.u}</td><td>${u.p}</td>
+                <td><button class="btn-sm" style="background:red" onclick="alert('Gunakan Google Sheets untuk hapus user')">X</button></td></tr>`).join('');
+        }
+
+        // Status Saya (User)
+        if(!isAdmin) {
+            const mine = records.filter(r => r.owner === currentUser.u);
+            document.getElementById('myStatusList').innerHTML = mine.length ? 
+                `<table><thead><tr><th>Klinik</th><th>Status</th><th>Hasil</th></tr></thead><tbody>` + 
+                mine.map(m => `<tr><td>${m.klinik}</td><td><b>${m.status.toUpperCase()}</b></td><td>${m.hasil}</td></tr>`).join('') + 
+                `</tbody></table>` : "Belum ada pengajuan.";
+        }
+
+        // Hasil Global
+        const apprv = records.filter(r => r.status === 'approved' && r.nama.toLowerCase().includes(q));
+        document.getElementById('listHasil').innerHTML = apprv.map(r => {
+            const blur = (isAdmin || r.owner === currentUser.u) ? '' : 'blur-text';
+            const bCol = r.hasil === 'FIT' ? '#27ae60' : (r.hasil === 'UNFIT' ? '#c0392b' : '#f39c12');
+            let row = `<tr><td>${r.tglMcu}</td><td>${r.nama}</td><td>${r.klinik}</td>
+                       <td><span class="badge ${blur}" style="background:${bCol}">${r.hasil}</span></td>`;
+            if(isAdmin) row += `<td><button class="btn-sm" style="background:#2980b9" onclick="setHasil(${r.id})">SET</button></td>`;
+            return row + `</tr>`;
+        }).join('');
+    }
+
+    document.getElementById('formMcu').onsubmit = async function(e) {
+        e.preventDefault();
+        showLoader(true);
+        const dataBaru = {
+            id: Date.now(),
+            owner: currentUser.u,
+            nama: document.getElementById('nama').value,
+            noHp: document.getElementById('noHp').value,
+            kumiai: document.getElementById('kumiai').value,
+            klinik: document.getElementById('klinik').value,
+            tipe: document.getElementById('tipeMcu').value,
+            status: 'pending',
+            hasil: 'PROSES',
+            tglMcu: '-',
+            tglInput: new Date().toLocaleDateString('id-ID'),
+            timestamp: new Date().getTime()
+        };
+
+        await fetch(SCRIPT_URL, {
+            method: "POST",
+            body: JSON.stringify({ table: "records", action: "insert", data: Object.values(dataBaru) })
+        });
+        
+        this.reset();
+        await syncData();
+        if(currentUser.role !== 'admin') openTab('status-saya');
+        alert("Berhasil dikirim ke Cloud!");
+    };
+
+    async function approve(id) {
+        const t = prompt("Tanggal MCU (Contoh: 15 Mar 2024):");
+        if(!t) return;
+        showLoader(true);
+        await fetch(SCRIPT_URL, {
+            method: "POST",
+            body: JSON.stringify({ table: "records", action: "update", id: id, status: "approved", tglMcu: t })
+        });
+        await syncData();
+    }
+
+    async function setHasil(id) {
+        const h = prompt("Ketik: 1:FIT, 2:NOTE, 3:UNFIT");
+        let val = h==="1"?"FIT":(h==="2"?"FIT WITH NOTE":(h==="3"?"UNFIT":""));
+        if(!val) return alert("Batal.");
+        showLoader(true);
+        await fetch(SCRIPT_URL, {
+            method: "POST",
+            body: JSON.stringify({ table: "records", action: "update", id: id, hasil: val })
+        });
+        await syncData();
+    }
+
+    async function doRegister() {
+        const u = document.getElementById('regUser').value.trim();
+        const p = document.getElementById('regPass').value.trim();
+        const n = document.getElementById('regFullName').value.trim();
+        if(!u || !p || !n) return alert("Lengkapi data!");
+        
+        showLoader(true);
+        await fetch(SCRIPT_URL, {
+            method: "POST",
+            body: JSON.stringify({ table: "users", action: "insert", data: [n, u, p, "-", "-"] })
+        });
+        alert("Sukses! Silakan Login.");
+        location.reload();
     }
 
     function openTab(id) {
@@ -187,158 +335,19 @@
         document.getElementById('page-' + id).classList.add('active');
         document.getElementById('btn-' + id)?.classList.add('active');
         if(id === 'admin') document.getElementById('tabAdmin').classList.add('active');
-        loadData();
-    }
-
-    function loadData() {
-        if(!currentUser) return;
-        const isAdmin = (currentUser.role === 'admin');
-        const q = document.getElementById('search').value.toLowerCase();
-
-        // 1. Pending Queue (Admin)
-        if(isAdmin) {
-            const pnd = records.filter(r => r.status === 'pending');
-            document.getElementById('listPending').innerHTML = pnd.map(r => `
-                <tr>
-                    <td>${r.nama}</td>
-                    <td>${r.klinik}</td>
-                    <td>${r.kumiai}</td>
-                    <td><button class="btn-sm btn-green" onclick="approve(${r.id})">APPROVE</button></td>
-                </tr>`).join('');
-            
-            document.getElementById('tbodyUser').innerHTML = users.map(u => `
-                <tr>
-                    <td>${u.name}</td>
-                    <td>${u.u}</td>
-                    <td>${u.p}</td>
-                    <td><button class="btn-sm" style="background:red; color:white" onclick="hapusU('${u.u}')">HAPUS</button></td>
-                </tr>`).join('');
-        }
-
-        // 2. My Status (User)
-        if(!isAdmin) {
-            const mine = records.filter(r => r.owner === currentUser.u);
-            document.getElementById('myStatusList').innerHTML = mine.length ? 
-                `<table><thead><tr><th>Klinik</th><th>Jenis</th><th>Status</th><th>Hasil</th></tr></thead><tbody>` + 
-                mine.map(m => `<tr><td>${m.klinik}</td><td>${m.tipe}</td><td><b>${m.status.toUpperCase()}</b></td><td>${m.hasil}</td></tr>`).join('') + 
-                `</tbody></table>` : "Belum ada riwayat pengajuan.";
-        }
-
-        // 3. Global Results
-        const apprv = records.filter(r => r.status === 'approved' && r.nama.toLowerCase().includes(q));
-        document.getElementById('listHasil').innerHTML = apprv.map(r => {
-            const isMeOrAdmin = (isAdmin || r.owner === currentUser.u);
-            const blurClass = isMeOrAdmin ? '' : 'blur-text';
-            const badgeColor = r.hasil === 'FIT' ? '#27ae60' : (r.hasil === 'UNFIT' ? '#c0392b' : '#f39c12');
-            
-            let row = `<tr>
-                <td>${r.tglMcu}</td>
-                <td>${r.nama}</td>
-                <td>${r.klinik}</td>
-                <td><span class="badge ${blurClass}" style="background:${badgeColor}">${r.hasil}</span></td>`;
-            
-            if(isAdmin) {
-                row += `<td><button class="btn-sm btn-blue" onclick="setHasil(${r.id})">SET HASIL</button></td>`;
-            } else {
-                row += `<td style="display:none"></td>`;
-            }
-            row += `</tr>`;
-            return row;
-        }).join('');
-    }
-
-    document.getElementById('formMcu').onsubmit = function(e) {
-        e.preventDefault();
-        records.push({
-            id: Date.now(), owner: currentUser.u,
-            nama: document.getElementById('nama').value,
-            noHp: document.getElementById('noHp').value,
-            kumiai: document.getElementById('kumiai').value,
-            klinik: document.getElementById('klinik').value,
-            tipe: document.getElementById('tipeMcu').value,
-            status: 'pending', hasil: 'PROSES', tglMcu: '-'
-        });
-        localStorage.setItem("Y_RECORDS", JSON.stringify(records));
-        alert("Pengajuan Berhasil Terkirim!");
-        this.reset();
-        loadData();
-        if(currentUser.role !== 'admin') openTab('status-saya');
-    };
-
-    function approve(id) {
-        const t = prompt("Masukkan Tanggal MCU (Contoh: 25 Jan 2024):");
-        if(!t) return;
-        const i = records.findIndex(x => x.id === id);
-        records[i].status = 'approved';
-        records[i].tglMcu = t;
-        localStorage.setItem("Y_RECORDS", JSON.stringify(records));
-        loadData();
-    }
-
-    function setHasil(id) {
-        const h = prompt("Ketik Angka:\n1 = FIT\n2 = FIT WITH NOTE\n3 = UNFIT");
-        const i = records.findIndex(x => x.id === id);
-        if(h === '1') records[i].hasil = "FIT";
-        else if(h === '2') records[i].hasil = "FIT WITH NOTE";
-        else if(h === '3') records[i].hasil = "UNFIT";
-        else return alert("Pilihan tidak valid!");
-        
-        localStorage.setItem("Y_RECORDS", JSON.stringify(records));
-        loadData();
     }
 
     function toggleAuth() {
-        const lf = document.getElementById('loginForm');
         const rf = document.getElementById('registerForm');
-        const link = document.getElementById('switchLink');
-        if(rf.style.display === 'none') {
-            lf.style.display = 'none'; rf.style.display = 'block'; link.innerText = "Sudah punya akun? Login";
-        } else {
-            lf.style.display = 'block'; rf.style.display = 'none'; link.innerText = "Buat Akun Siswa";
-        }
-    }
-
-    function doRegister() {
-        const u = document.getElementById('regUser').value.trim();
-        const p = document.getElementById('regPass').value.trim();
-        const n = document.getElementById('regFullName').value.trim();
-        if(!u || !p || !n) return alert("Isi semua data!");
-        users.push({ u, p, name: n });
-        localStorage.setItem("Y_USERS", JSON.stringify(users));
-        alert("Pendaftaran Berhasil! Silakan Login.");
-        location.reload();
+        const lf = document.getElementById('loginForm');
+        const sw = document.getElementById('switchLink');
+        const isReg = rf.style.display === 'block';
+        rf.style.display = isReg ? 'none' : 'block';
+        lf.style.display = isReg ? 'block' : 'none';
+        sw.innerText = isReg ? "Buat Akun Siswa" : "Kembali Login";
     }
 
     function logout() { localStorage.removeItem("Y_SESSION"); location.reload(); }
-    function hapusU(un) { if(confirm("Hapus akun " + un + "?")) { users = users.filter(x => x.u !== un); localStorage.setItem("Y_USERS", JSON.stringify(users)); loadData(); } }
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQYBpd8PtZwdHBl5s2CaQOkwN6RC1e_feVrGFae87Ug7qhncasW6YyEa5ItuevAoT1Pg/exec"; 
-
-async function loadDataOnline() {
-    // Ambil Data Siswa
-    const resUsers = await fetch(SCRIPT_URL + "?action=readUsers");
-    const dataUsers = await resUsers.json();
-    // Proses dataUsers ke variabel 'users' di kode Anda
-    
-    // Ambil Data MCU
-    const resRec = await fetch(SCRIPT_URL + "?action=readRecords");
-    const dataRec = await resRec.json();
-    // Proses dataRec ke variabel 'records' di kode Anda
-    
-    loadData(); // Jalankan fungsi render tabel yang sudah ada
-}
-
-async function simpanMcuOnline(dataBaru) {
-    await fetch(SCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify({
-            table: "records",
-            action: "insert",
-            data: Object.values(dataBaru)
-        })
-    });
-    alert("Data Terkirim ke Cloud!");
-    loadDataOnline();
-}
 </script>
 </body>
 </html>
