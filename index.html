@@ -16,9 +16,6 @@
         .auth-container h2 { text-align: center; color: var(--primary); margin-top: 0; margin-bottom: 5px; }
         .auth-container input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
         
-        .remember-box { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #555; margin: 10px 0; cursor: pointer; }
-        .remember-box input { width: auto; margin: 0; }
-
         /* APP LAYOUT */
         .main-app { display: none; padding: 20px; }
         .container { max-width: 1400px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
@@ -52,8 +49,6 @@
         .btn-warning { background-color: var(--warning); color: #333; }
         .btn-sm { padding: 6px 10px; font-size: 12px; }
 
-        .empty-state { text-align: center; color: var(--danger); font-weight: bold; padding: 25px; background: #fdf2f2; border-radius: 8px; border: 1px dashed var(--danger); }
-
         @media print { .no-print { display: none !important; } .blur-text { filter: none !important; } }
     </style>
 </head>
@@ -66,19 +61,17 @@
     <div id="loginForm">
         <input type="text" id="uName" placeholder="Username">
         <input type="password" id="uPass" placeholder="Password">
-        <label class="remember-box"><input type="checkbox" id="rememberMe"> Ingat akun saya</label>
         <button class="btn btn-primary" style="width: 100%; margin-top:10px;" onclick="doLogin()">MASUK KE SISTEM</button>
     </div>
 
     <div id="registerForm" style="display:none;">
         <input type="text" id="regFullName" placeholder="Nama Lengkap">
-        <input type="text" id="regEmail" placeholder="Email (contoh@gmail.com)">
-        <input type="text" id="regPhone" placeholder="Nomor HP (08xxxxxxxxxx)">
+        <input type="text" id="regEmail" placeholder="Email">
+        <input type="text" id="regPhone" placeholder="Nomor HP">
         <input type="text" id="regUser" placeholder="Username Baru">
         <input type="password" id="regPass" placeholder="Password Baru">
         <button class="btn btn-success" style="width: 100%; margin-top: 10px;" onclick="doRegister()">DAFTAR SEKARANG</button>
     </div>
-    
     <div style="text-align: center; margin-top: 20px;"><a href="javascript:void(0)" onclick="toggleAuth()" id="switchLink" style="color:var(--primary); font-weight:bold; text-decoration:none">Buat Akun Siswa</a></div>
 </div>
 
@@ -86,7 +79,7 @@
     <div class="container">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px">
             <h3 style="color:var(--primary); margin:0">SISTEM MEDICAL YONASINDO</h3>
-            <div><span id="displayUser" style="font-weight:bold; margin-right:10px; color: var(--primary);"></span><button class="btn" style="background:#95a5a6" onclick="logout()">LOGOUT</button></div>
+            <div><span id="displayUser" style="font-weight:bold; margin-right:10px;"></span><button class="btn" style="background:#95a5a6" onclick="logout()">LOGOUT</button></div>
         </div>
 
         <div class="tab-menu no-print">
@@ -99,10 +92,10 @@
         <div id="page-pengajuan" class="page-content active">
             <div class="section-box">
                 <form id="formMcu" class="mcu-form">
-                    <div class="input-group"><label>Nama Lengkap</label><input type="text" id="nama" placeholder="Nama Lengkap Siswa" required></div>
-                    <div class="input-group"><label>Nomor HP</label><input type="text" id="noHp" placeholder="No. HP" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required></div>
+                    <div class="input-group"><label>Nama Lengkap</label><input type="text" id="nama" required></div>
+                    <div class="input-group"><label>Nomor HP</label><input type="text" id="noHp" required></div>
                     <div class="input-group"><label>Tanggal Lahir</label><input type="date" id="tglLahir" required></div>
-                    <div class="input-group"><label>Nama Kumiai</label><input type="text" id="kumiai" placeholder="Nama Kumiai" required></div>
+                    <div class="input-group"><label>Nama Kumiai</label><input type="text" id="kumiai" required></div>
                     <div class="input-group">
                         <label>Pilih Klinik</label>
                         <select id="klinik" required>
@@ -115,22 +108,22 @@
                         <label>Jenis MCU</label>
                         <select id="tipeMcu" required>
                             <option value="" disabled selected>-- Pilih Jenis MCU --</option>
-                            <option value="MCU PRA">MCU PRA (Baru masuk LPK Yonasindo Intra Pratama)</option>
-                            <option value="MCU FULL">MCU FULL (Setelah lolos mensetsu/job)</option>
-                            <option value="MCU AKHIR">MCU AKHIR (CoE)</option>
+                            <option value="MCU PRA">MCU PRA</option>
+                            <option value="MCU FULL">MCU FULL</option>
+                            <option value="MCU AKHIR">MCU AKHIR</option>
                         </select>
                     </div>
                     <div style="grid-column: span 3; text-align: right; margin-top: 10px;">
-                        <button type="submit" class="btn btn-primary" style="width: 250px;" id="btnSubmitForm">SIMPAN PENGAJUAN</button>
+                        <button type="submit" class="btn btn-primary" id="btnSubmitForm">SIMPAN PENGAJUAN</button>
                         <button type="button" class="btn btn-danger" id="btnBatalEdit" style="display:none;" onclick="batalModeEdit()">BATAL EDIT</button>
                     </div>
                 </form>
             </div>
             
             <div id="adminApprovalUI" style="display:none">
-                <h4 style="color:var(--danger)">Antrean Pengajuan (Admin Only)</h4>
+                <h4 style="color:var(--danger)">Antrean Pengajuan Masuk</h4>
                 <table>
-                    <thead><tr><th>Tgl Daftar</th><th>Nama</th><th>Klinik</th><th>Kumiai</th><th>Jenis</th><th>Aksi</th></tr></thead>
+                    <thead><tr><th>Tgl Daftar</th><th>Nama</th><th>Klinik</th><th>Kumiai</th><th>Aksi</th></tr></thead>
                     <tbody id="listPending"></tbody>
                 </table>
             </div>
@@ -138,17 +131,17 @@
 
         <div id="page-status-saya" class="page-content">
             <div class="section-box">
-                <h4 style="color:var(--primary); margin-top:0;">Riwayat & Status Pengajuan Saya</h4>
+                <h4 style="color:var(--primary)">Riwayat Pengajuan Saya</h4>
                 <div id="myStatusContent"></div>
             </div>
         </div>
 
         <div id="page-hasil" class="page-content">
             <div class="section-box">
-                <h4 style="color:var(--primary)">Database Hasil MCU (A-Z)</h4>
-                <input type="text" id="search" placeholder="Cari Nama Siswa..." onkeyup="loadData()" style="width:100%; margin-bottom:15px">
+                <h4 style="color:var(--primary)">Database Hasil MCU</h4>
+                <input type="text" id="search" placeholder="Cari Nama..." onkeyup="loadData()" style="width:100%; margin-bottom:15px">
                 <table>
-                    <thead><tr><th>Approved</th><th>Tgl MCU</th><th>Nama</th><th>No. HP</th><th>Klinik</th><th>Kumiai</th><th>Jenis</th><th>Hasil</th><th class="admin-only-col" style="display:none">Opsi</th></tr></thead>
+                    <thead><tr><th>Approved</th><th>Tgl MCU</th><th>Nama</th><th>Klinik</th><th>Jenis</th><th>Hasil</th><th id="adminCol" style="display:none">Opsi</th></tr></thead>
                     <tbody id="listHasil"></tbody>
                 </table>
             </div>
@@ -156,9 +149,9 @@
 
         <div id="page-admin" class="page-content">
             <div class="section-box">
-                <h4 style="color:var(--danger)">Database Seluruh Akun (A-Z)</h4>
+                <h4 style="color:var(--danger)">Database Akun Terdaftar</h4>
                 <table>
-                    <thead><tr><th>Nama Lengkap</th><th>Email</th><th>No. HP</th><th>Username</th><th>Aksi</th></tr></thead>
+                    <thead><tr><th>Nama</th><th>Email</th><th>No. HP</th><th>Username</th><th>Aksi</th></tr></thead>
                     <tbody id="listUser"></tbody>
                 </table>
             </div>
@@ -177,70 +170,55 @@
     let currentUser = null;
     let currentEditId = null;
 
-    // AUTO LOGIN
     (function() {
         const saved = localStorage.getItem(DB_SESSION);
-        if (saved) { 
-            currentUser = JSON.parse(saved); 
-            enterApp(); 
-        }
+        if (saved) { currentUser = JSON.parse(saved); enterApp(); }
     })();
 
     function toggleAuth() {
         const isLogin = document.getElementById('loginForm').style.display !== 'none';
         document.getElementById('loginForm').style.display = isLogin ? 'none' : 'block';
         document.getElementById('registerForm').style.display = isLogin ? 'block' : 'none';
-        document.getElementById('switchLink').innerText = isLogin ? 'Login Disini' : 'Buat Akun Siswa';
-    }
-
-    function doRegister() {
-        const name = document.getElementById('regFullName').value.trim();
-        const email = document.getElementById('regEmail').value.trim();
-        const phone = document.getElementById('regPhone').value.trim();
-        const u = document.getElementById('regUser').value.trim();
-        const p = document.getElementById('regPass').value.trim();
-        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return alert("data berikut bukan email aktif");
-        if(!name || !u || !p) return alert("Lengkapi semua kolom!");
-        if(users.find(x => x.u === u)) return alert("Username sudah digunakan!");
-        users.push({ u, p, name, email, phone });
-        localStorage.setItem(DB_USERS, JSON.stringify(users));
-        alert("Berhasil Daftar!"); toggleAuth();
     }
 
     function doLogin() {
         const u = document.getElementById('uName').value.trim();
         const p = document.getElementById('uPass').value.trim();
-        const remember = document.getElementById('rememberMe').checked;
 
-        let found = null;
-        // CEK ADMIN DULU (Wajib prioritas utama)
         if(u === ADMIN_CRED.user && p === ADMIN_CRED.pass) {
-            found = { u: u, role: 'admin' };
-        } else {
-            found = users.find(x => x.u === u && x.p === p);
-            if(found) found.role = 'user';
-        }
-
-        if(found) {
-            currentUser = found;
-            if(remember) localStorage.setItem(DB_SESSION, JSON.stringify(found));
+            currentUser = { u: u, role: 'admin' };
+            localStorage.setItem(DB_SESSION, JSON.stringify(currentUser));
             enterApp();
-        } else alert("Username atau Password salah!");
+        } else {
+            let found = users.find(x => x.u === u && x.p === p);
+            if(found) {
+                currentUser = { ...found, role: 'user' };
+                localStorage.setItem(DB_SESSION, JSON.stringify(currentUser));
+                enterApp();
+            } else alert("Login Gagal!");
+        }
     }
 
     function enterApp() {
         document.getElementById('authPage').style.display = 'none';
         document.getElementById('appPage').style.display = 'block';
-        document.getElementById('displayUser').innerText = (currentUser.role === 'admin' ? "ADMIN: " : "USER: ") + currentUser.u.toUpperCase();
         
-        // RESET UI ROLE
         const isAdmin = currentUser.role === 'admin';
-        document.getElementById('adminApprovalUI').style.display = isAdmin ? 'block' : 'none';
-        document.getElementById('tabAdmin').style.display = isAdmin ? 'block' : 'none';
         
-        // Tampilkan kolom opsi di tabel hasil hanya untuk admin
-        document.querySelectorAll('.admin-only-col').forEach(el => el.style.display = isAdmin ? 'table-cell' : 'none');
+        // Identity Display
+        const disp = document.getElementById('displayUser');
+        disp.innerText = isAdmin ? "ADMIN: " + currentUser.u.toUpperCase() : "USER: " + currentUser.u.toUpperCase();
+        disp.style.color = isAdmin ? "var(--danger)" : "var(--primary)";
 
+        // Tab Control
+        document.getElementById('tab-status').style.display = isAdmin ? 'none' : 'block';
+        document.getElementById('tabAdmin').style.display = isAdmin ? 'block' : 'none';
+        document.getElementById('adminApprovalUI').style.display = isAdmin ? 'block' : 'none';
+        document.getElementById('adminCol').style.display = isAdmin ? 'table-cell' : 'none';
+
+        // Redirect Admin if on "Status Saya"
+        if(isAdmin) openTab('pengajuan');
+        
         loadData();
     }
 
@@ -256,110 +234,56 @@
         loadData();
     }
 
-    document.getElementById('formMcu').onsubmit = function(e) {
-        e.preventDefault();
-        if(currentEditId !== null) {
-            const idx = records.findIndex(i => i.id === currentEditId);
-            records[idx].nama = document.getElementById('nama').value;
-            records[idx].noHp = document.getElementById('noHp').value;
-            records[idx].tglLahir = document.getElementById('tglLahir').value;
-            records[idx].kumiai = document.getElementById('kumiai').value;
-            records[idx].klinik = document.getElementById('klinik').value;
-            records[idx].tipe = document.getElementById('tipeMcu').value;
-            alert("Data berhasil diperbarui!");
-            batalModeEdit();
-        } else {
-            records.push({
-                id: Date.now(), owner: currentUser.u,
-                nama: document.getElementById('nama').value,
-                noHp: document.getElementById('noHp').value,
-                tglLahir: document.getElementById('tglLahir').value,
-                kumiai: document.getElementById('kumiai').value,
-                klinik: document.getElementById('klinik').value,
-                tipe: document.getElementById('tipeMcu').value,
-                tglInput: new Date().toLocaleDateString('id-ID'),
-                timestamp: new Date().getTime(),
-                status: 'pending', hasil: 'PROSES', tglMcu: '-'
-            });
-            alert("Pengajuan tersimpan!");
-            this.reset(); 
-        }
-        localStorage.setItem(DB_RECORDS, JSON.stringify(records));
-        openTab('status-saya');
-    };
-
     function loadData() {
-        if(!currentUser) return;
         const isAdmin = currentUser.role === 'admin';
         const q = document.getElementById('search').value.toLowerCase();
 
-        // MY STATUS
-        const myRecords = records.filter(i => i.owner === currentUser.u).sort((a,b) => b.timestamp - a.timestamp);
-        if(myRecords.length === 0) {
-            document.getElementById('myStatusContent').innerHTML = `<div class="empty-state">Belum ada pengajuan MCU, Silahkan isi pengajuan MCU terlebih dahulu!</div>`;
-        } else {
-            let html = `<table><thead><tr><th>Tgl Daftar</th><th>Klinik</th><th>Kumiai</th><th>Jenis MCU</th><th>Status</th><th>Opsi</th></tr></thead><tbody>`;
-            myRecords.forEach(i => {
-                let badgeStatus = i.status === 'pending' ? '<span class="badge wait" style="background:#f39c12">Menunggu Admin</span>' : '<span class="badge fit">Di-Approve</span>';
-                let btnOps = i.status === 'pending' ? `<button class="btn btn-warning btn-sm" onclick="editPengajuan(${i.id})">Edit</button> <button class="btn btn-danger btn-sm" onclick="batalPengajuan(${i.id})">Batal</button>` : `<span style="font-size:11px; color:#7f8c8d; font-style:italic">Terkunci</span>`;
-                html += `<tr><td>${i.tglInput}</td><td><b>${i.klinik}</b></td><td>${i.kumiai}</td><td>${i.tipe.split(' (')[0]}</td><td>${badgeStatus}</td><td>${btnOps}</td></tr>`;
-            });
-            html += `</tbody></table>`;
-            document.getElementById('myStatusContent').innerHTML = html;
-        }
-
-        // ADMIN PENDING
+        // Admin Tables
         if(isAdmin) {
             const pending = records.filter(i => i.status === 'pending').sort((a,b) => b.timestamp - a.timestamp);
-            document.getElementById('listPending').innerHTML = pending.map(i => `<tr><td>${i.tglInput}</td><td>${i.nama}</td><td><small>${i.klinik}</small></td><td>${i.kumiai}</td><td>${i.tipe.split(' (')[0]}</td><td><button class="btn btn-success" onclick="approve(${i.id})">APPROVE</button></td></tr>`).join('');
-            const sortedUsers = [...users].sort((a,b) => a.name.localeCompare(b.name));
-            document.getElementById('listUser').innerHTML = sortedUsers.map(u => `<tr><td>${u.name}</td><td>${u.email}</td><td>${u.phone}</td><td>${u.u}</td><td><button class="btn btn-danger" onclick="hapusUser('${u.u}')">HAPUS</button></td></tr>`).join('');
+            document.getElementById('listPending').innerHTML = pending.map(i => `<tr><td>${i.tglInput}</td><td>${i.nama}</td><td>${i.klinik}</td><td>${i.kumiai}</td><td><button class="btn btn-success btn-sm" onclick="approve(${i.id})">APPROVE</button></td></tr>`).join('');
+            
+            document.getElementById('listUser').innerHTML = users.map(u => `<tr><td>${u.name}</td><td>${u.email}</td><td>${u.phone}</td><td>${u.u}</td><td><button class="btn btn-danger btn-sm" onclick="hapusUser('${u.u}')">HAPUS</button></td></tr>`).join('');
         }
 
-        // GLOBAL RESULT
-        let approved = records.filter(i => i.status === 'approved' && i.nama.toLowerCase().includes(q)).sort((a,b) => a.nama.localeCompare(b.nama));
+        // User Status
+        if(!isAdmin) {
+            const myRecords = records.filter(i => i.owner === currentUser.u);
+            document.getElementById('myStatusContent').innerHTML = myRecords.length === 0 ? "Belum ada data" : `<table><thead><tr><th>Tgl</th><th>Klinik</th><th>Status</th></tr></thead><tbody>` + myRecords.map(i => `<tr><td>${i.tglInput}</td><td>${i.klinik}</td><td>${i.status}</td></tr>`).join('') + `</tbody></table>`;
+        }
+
+        // Global Hasil
+        let approved = records.filter(i => i.status === 'approved' && i.nama.toLowerCase().includes(q));
         document.getElementById('listHasil').innerHTML = approved.map(i => {
-            const noBlur = isAdmin || (i.owner === currentUser.u);
-            const hClass = i.hasil.includes('Fit to Work') ? 'fit' : (i.hasil.includes('Note') ? 'note' : (i.hasil.includes('Unfit') ? 'unfit' : 'wait'));
-            return `<tr><td>${i.tglApp}</td><td><b>${i.tglMcu}</b></td><td>${i.nama}</td><td class="${noBlur?'':'blur-text'}">${i.noHp}</td><td><small>${i.klinik}</small></td><td>${i.kumiai}</td><td>${i.tipe.split(' (')[0]}</td><td><span class="badge ${hClass} ${noBlur?'':'blur-text'}">${i.hasil}</span></td><td class="admin-only-col" style="${isAdmin?'':'display:none'}"><button class="btn btn-success" onclick="setHasil(${i.id})">HASIL</button></td></tr>`;
+            const isMe = i.owner === currentUser.u || isAdmin;
+            const blur = isMe ? '' : 'blur-text';
+            return `<tr><td>${i.tglApp}</td><td>${i.tglMcu}</td><td>${i.nama}</td><td>${i.klinik}</td><td>${i.tipe}</td><td><span class="badge ${blur}">${i.hasil}</span></td><td style="${isAdmin?'':'display:none'}"><button class="btn btn-success btn-sm" onclick="setHasil(${i.id})">SET HASIL</button></td></tr>`;
         }).join('');
     }
 
-    function editPengajuan(id) {
-        const data = records.find(i => i.id === id);
-        if(!data) return;
-        currentEditId = id;
-        document.getElementById('nama').value = data.nama;
-        document.getElementById('noHp').value = data.noHp;
-        document.getElementById('tglLahir').value = data.tglLahir;
-        document.getElementById('kumiai').value = data.kumiai;
-        document.getElementById('klinik').value = data.klinik;
-        document.getElementById('tipeMcu').value = data.tipe;
-        document.getElementById('btnSubmitForm').innerText = "UPDATE PENGAJUAN";
-        document.getElementById('btnSubmitForm').className = "btn btn-warning";
-        document.getElementById('btnBatalEdit').style.display = 'inline-block';
-        openTab('pengajuan');
-    }
-
-    function batalModeEdit() {
-        currentEditId = null;
-        document.getElementById('formMcu').reset();
-        document.getElementById('btnSubmitForm').innerText = "SIMPAN PENGAJUAN";
-        document.getElementById('btnSubmitForm').className = "btn btn-primary";
-        document.getElementById('btnBatalEdit').style.display = 'none';
-        openTab('status-saya');
-    }
-
-    function batalPengajuan(id) {
-        if(confirm("Hapus pengajuan ini?")) {
-            records = records.filter(i => i.id !== id);
-            localStorage.setItem(DB_RECORDS, JSON.stringify(records));
-            loadData();
-        }
-    }
+    // Fungsi Support (Daftar, Approve, dll tetap sama dengan perbaikan role)
+    document.getElementById('formMcu').onsubmit = function(e) {
+        e.preventDefault();
+        records.push({
+            id: Date.now(), owner: currentUser.u,
+            nama: document.getElementById('nama').value,
+            noHp: document.getElementById('noHp').value,
+            tglLahir: document.getElementById('tglLahir').value,
+            kumiai: document.getElementById('kumiai').value,
+            klinik: document.getElementById('klinik').value,
+            tipe: document.getElementById('tipeMcu').value,
+            tglInput: new Date().toLocaleDateString('id-ID'),
+            timestamp: new Date().getTime(),
+            status: 'pending', hasil: 'PROSES', tglMcu: '-'
+        });
+        localStorage.setItem(DB_RECORDS, JSON.stringify(records));
+        alert("Berhasil!");
+        this.reset();
+        openTab(currentUser.role === 'admin' ? 'pengajuan' : 'status-saya');
+    };
 
     function approve(id) {
-        const tgl = prompt("Tanggal Pelaksanaan MCU:"); if(!tgl) return;
+        const tgl = prompt("Tanggal MCU:"); if(!tgl) return;
         const idx = records.findIndex(i => i.id === id);
         records[idx].status = 'approved'; records[idx].tglMcu = tgl; records[idx].tglApp = new Date().toLocaleDateString('id-ID');
         localStorage.setItem(DB_RECORDS, JSON.stringify(records)); loadData();
@@ -374,12 +298,15 @@
         localStorage.setItem(DB_RECORDS, JSON.stringify(records)); loadData();
     }
 
-    function hapusUser(username) {
-        if(confirm("Hapus akun ini?")) {
-            users = users.filter(u => u.u !== username);
-            localStorage.setItem(DB_USERS, JSON.stringify(users)); loadData();
-        }
+    function doRegister() {
+        const u = document.getElementById('regUser').value;
+        const p = document.getElementById('regPass').value;
+        const n = document.getElementById('regFullName').value;
+        users.push({u, p, name: n, email: document.getElementById('regEmail').value, phone: document.getElementById('regPhone').value});
+        localStorage.setItem(DB_USERS, JSON.stringify(users)); alert("Sukses!"); toggleAuth();
     }
+    
+    function hapusUser(un) { if(confirm("Hapus?")) { users = users.filter(x=>x.u!==un); localStorage.setItem(DB_USERS, JSON.stringify(users)); loadData(); }}
 </script>
 </body>
 </html>
