@@ -21,31 +21,38 @@
 
         /* APP LAYOUT */
         .main-app { display: none; padding: 20px; }
-        .container { max-width: 1300px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .container { max-width: 1400px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
         
-        /* TAB SYSTEM */
-        .tab-menu { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--light-green); padding-bottom: 10px; }
-        .tab-btn { padding: 10px 20px; border: none; background: #eee; cursor: pointer; border-radius: 8px; font-weight: bold; color: #666; transition: 0.3s; }
+        /* TAB SYSTEM - NOMOR DIHAPUS */
+        .tab-menu { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--light-green); padding-bottom: 10px; overflow-x: auto; }
+        .tab-btn { padding: 12px 25px; border: none; background: #eee; cursor: pointer; border-radius: 8px; font-weight: bold; color: #666; transition: 0.3s; white-space: nowrap; text-transform: uppercase; font-size: 13px; }
         .tab-btn.active { background: var(--primary); color: white; }
         .page-content { display: none; }
         .page-content.active { display: block; }
 
         .section-box { background: #ffffff; padding: 20px; border-radius: 10px; border: 1px solid var(--light-green); margin-bottom: 25px; }
-        form { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-        input, select, button { padding: 12px; border: 1px solid #ced4da; border-radius: 8px; }
+        
+        .mcu-form { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; align-items: end; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        .input-group label { font-size: 12px; font-weight: bold; color: var(--primary); margin-left: 2px; }
+        input, select, button { padding: 12px; border: 1px solid #ced4da; border-radius: 8px; font-size: 14px; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th { background-color: var(--primary); color: white; padding: 12px; text-align: left; font-size: 13px; }
         td { border-bottom: 1px solid #edf2ed; padding: 12px; font-size: 13px; }
 
         .blur-text { filter: blur(6px); user-select: none; background: #eee; border-radius: 4px; pointer-events: none; }
-        .badge { padding: 4px 8px; border-radius: 5px; font-size: 11px; font-weight: bold; color: white; text-transform: uppercase; }
+        .badge { padding: 6px 10px; border-radius: 5px; font-size: 11px; font-weight: bold; color: white; text-transform: uppercase; }
         .fit { background: #27ae60; } .note { background: #f39c12; } .unfit { background: #c0392b; } .wait { background: #95a5a6; }
 
-        .btn { cursor: pointer; border: none; font-weight: bold; color: white; padding: 8px 12px; border-radius: 6px; transition: 0.2s; font-size: 12px; }
+        .btn { cursor: pointer; border: none; font-weight: bold; color: white; padding: 10px 15px; border-radius: 8px; transition: 0.2s; }
         .btn-primary { background-color: var(--primary); }
         .btn-success { background-color: var(--secondary); }
         .btn-danger { background-color: var(--danger); }
+        .btn-warning { background-color: var(--warning); color: #333; }
+        .btn-sm { padding: 6px 10px; font-size: 12px; }
+
+        .empty-state { text-align: center; color: var(--danger); font-weight: bold; padding: 25px; background: #fdf2f2; border-radius: 8px; border: 1px dashed var(--danger); }
 
         @media print { .no-print { display: none !important; } .blur-text { filter: none !important; } }
     </style>
@@ -83,42 +90,77 @@
         </div>
 
         <div class="tab-menu no-print">
-            <button class="tab-btn active" id="tab1" onclick="openTab('pengajuan')">1. PENGAJUAN MCU</button>
-            <button class="tab-btn" id="tab2" onclick="openTab('hasil')">2. HASIL & STATUS</button>
-            <button class="tab-btn" id="tabAdmin" onclick="openTab('admin')" style="display:none; background: var(--danger); color: white;">3. DATABASE AKUN</button>
+            <button class="tab-btn active" id="tab1" onclick="openTab('pengajuan')">FORM MCU</button>
+            <button class="tab-btn" id="tab-status" onclick="openTab('status-saya')">PENGAJUAN SAYA</button>
+            <button class="tab-btn" id="tab2" onclick="openTab('hasil')">HASIL MCU</button>
+            <button class="tab-btn" id="tabAdmin" onclick="openTab('admin')" style="display:none; background: var(--danger); color: white;">DATABASE AKUN</button>
         </div>
 
         <div id="page-pengajuan" class="page-content active">
             <div class="section-box">
-                <form id="formMcu">
-                    <input type="text" id="nama" placeholder="Nama Lengkap Siswa" required>
-                    <input type="text" id="noHp" placeholder="No. HP (Hanya Angka)" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
-                    <input type="date" id="tglLahir" required>
-                    <input type="text" id="kumiai" placeholder="Nama Kumiai" required>
-                    <select id="tipeMcu" required>
-                        <option value="" disabled selected>Tipe MCU</option>
-                        <option value="MCU PRA">MCU PRA</option>
-                        <option value="MCU FULL">MCU FULL</option>
-                        <option value="MCU AKHIR">MCU AKHIR</option>
-                    </select>
-                    <button type="submit" class="btn btn-primary">SIMPAN PENGAJUAN</button>
+                <form id="formMcu" class="mcu-form">
+                    <div class="input-group">
+                        <label>Nama Lengkap</label>
+                        <input type="text" id="nama" placeholder="Nama Lengkap Siswa" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Nomor HP</label>
+                        <input type="text" id="noHp" placeholder="No. HP" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Tanggal Lahir</label>
+                        <input type="date" id="tglLahir" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Nama Kumiai</label>
+                        <input type="text" id="kumiai" placeholder="Nama Kumiai" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Pilih Klinik</label>
+                        <select id="klinik" required>
+                            <option value="" disabled selected>-- Pilih Klinik --</option>
+                            <option value="Klinik Galaxy Medical Center">Klinik Galaxy Medical Center</option>
+                            <option value="Klinik Rosela Indah Medikal Center">Klinik Rosela Indah Medikal Center</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Jenis MCU</label>
+                        <select id="tipeMcu" required>
+                            <option value="" disabled selected>-- Pilih Jenis MCU --</option>
+                            <option value="MCU PRA">MCU PRA (Baru masuk LPK Yonasindo Intra Pratama)</option>
+                            <option value="MCU FULL">MCU FULL (Setelah lolos mensetsu/job)</option>
+                            <option value="MCU AKHIR">MCU AKHIR (CoE)</option>
+                        </select>
+                    </div>
+                    <div style="grid-column: span 3; text-align: right; margin-top: 10px;">
+                        <button type="submit" class="btn btn-primary" style="width: 250px;" id="btnSubmitForm">SIMPAN PENGAJUAN</button>
+                        <button type="button" class="btn btn-danger" id="btnBatalEdit" style="display:none;" onclick="batalModeEdit()">BATAL EDIT</button>
+                    </div>
                 </form>
             </div>
+            
             <div id="adminApprovalUI" style="display:none">
                 <h4 style="color:var(--danger)">Antrean Pengajuan (Terbaru di atas)</h4>
                 <table>
-                    <thead><tr><th>Tgl Daftar</th><th>Nama</th><th>Kumiai</th><th>Tipe</th><th>Aksi</th></tr></thead>
+                    <thead><tr><th>Tgl Daftar</th><th>Nama</th><th>Klinik</th><th>Kumiai</th><th>Jenis</th><th>Aksi</th></tr></thead>
                     <tbody id="listPending"></tbody>
                 </table>
             </div>
         </div>
 
+        <div id="page-status-saya" class="page-content">
+            <div class="section-box">
+                <h4 style="color:var(--primary); margin-top:0;">Riwayat & Status Pengajuan Saya</h4>
+                <div id="myStatusContent"></div>
+            </div>
+        </div>
+
         <div id="page-hasil" class="page-content">
             <div class="section-box">
-                <h4 style="color:var(--primary)">Database Hasil (A-Z)</h4>
-                <input type="text" id="search" placeholder="Cari Nama..." onkeyup="loadData()" style="width:100%; margin-bottom:15px">
+                <h4 style="color:var(--primary)">Database Hasil MCU (A-Z)</h4>
+                <input type="text" id="search" placeholder="Cari Nama Siswa..." onkeyup="loadData()" style="width:100%; margin-bottom:15px">
                 <table>
-                    <thead><tr><th>Approved</th><th>Tgl MCU</th><th>Nama</th><th>No. HP</th><th>Kumiai</th><th>Tipe</th><th>Hasil</th><th id="adminCol" style="display:none">Opsi</th></tr></thead>
+                    <thead><tr><th>Approved</th><th>Tgl MCU</th><th>Nama</th><th>No. HP</th><th>Klinik</th><th>Kumiai</th><th>Jenis</th><th>Hasil</th><th id="adminCol" style="display:none">Opsi</th></tr></thead>
                     <tbody id="listHasil"></tbody>
                 </table>
             </div>
@@ -137,7 +179,6 @@
 </div>
 
 <script>
-    // --- KUNCI NAMA DATABASE AGAR TIDAK HILANG ---
     const DB_USERS = "YONASINDO_USERS_DATABASE";
     const DB_RECORDS = "YONASINDO_RECORDS_DATABASE";
     const DB_SESSION = "YONASINDO_ACTIVE_SESSION";
@@ -146,8 +187,8 @@
     let users = JSON.parse(localStorage.getItem(DB_USERS)) || [];
     let records = JSON.parse(localStorage.getItem(DB_RECORDS)) || [];
     let currentUser = null;
+    let currentEditId = null;
 
-    // Auto Login
     (function() {
         const saved = localStorage.getItem(DB_SESSION);
         if (saved) { currentUser = JSON.parse(saved); enterApp(); }
@@ -174,7 +215,7 @@
 
         users.push({ u, p, name, email, phone });
         localStorage.setItem(DB_USERS, JSON.stringify(users));
-        alert("Berhasil Daftar!"); toggleAuth();
+        alert("Berhasil Daftar! Silakan login."); toggleAuth();
     }
 
     function doLogin() {
@@ -186,7 +227,7 @@
             currentUser = found;
             if(remember) localStorage.setItem(DB_SESSION, JSON.stringify(found));
             enterApp();
-        } else alert("Login Gagal!");
+        } else alert("Username atau Password salah!");
     }
 
     function enterApp() {
@@ -206,58 +247,115 @@
     function openTab(name) {
         document.querySelectorAll('.page-content, .tab-btn').forEach(el => el.classList.remove('active'));
         document.getElementById('page-' + name).classList.add('active');
+        if(name === 'pengajuan') document.getElementById('tab1').classList.add('active');
+        if(name === 'status-saya') document.getElementById('tab-status').classList.add('active');
+        if(name === 'hasil') document.getElementById('tab2').classList.add('active');
+        if(name === 'admin') document.getElementById('tabAdmin').classList.add('active');
         loadData();
     }
 
     document.getElementById('formMcu').onsubmit = function(e) {
         e.preventDefault();
-        records.push({
-            id: Date.now(), owner: currentUser.u,
-            nama: document.getElementById('nama').value,
-            noHp: document.getElementById('noHp').value,
-            tglLahir: document.getElementById('tglLahir').value,
-            kumiai: document.getElementById('kumiai').value,
-            tipe: document.getElementById('tipeMcu').value,
-            tglInput: new Date().toLocaleDateString('id-ID'),
-            timestamp: new Date().getTime(),
-            status: 'pending', hasil: 'PROSES', tglMcu: '-'
-        });
+        if(currentEditId !== null) {
+            const idx = records.findIndex(i => i.id === currentEditId);
+            records[idx].nama = document.getElementById('nama').value;
+            records[idx].noHp = document.getElementById('noHp').value;
+            records[idx].tglLahir = document.getElementById('tglLahir').value;
+            records[idx].kumiai = document.getElementById('kumiai').value;
+            records[idx].klinik = document.getElementById('klinik').value;
+            records[idx].tipe = document.getElementById('tipeMcu').value;
+            alert("Pengajuan Anda berhasil diperbarui!");
+            batalModeEdit();
+        } else {
+            records.push({
+                id: Date.now(), owner: currentUser.u,
+                nama: document.getElementById('nama').value,
+                noHp: document.getElementById('noHp').value,
+                tglLahir: document.getElementById('tglLahir').value,
+                kumiai: document.getElementById('kumiai').value,
+                klinik: document.getElementById('klinik').value,
+                tipe: document.getElementById('tipeMcu').value,
+                tglInput: new Date().toLocaleDateString('id-ID'),
+                timestamp: new Date().getTime(),
+                status: 'pending', hasil: 'PROSES', tglMcu: '-'
+            });
+            alert("Terima kasih telah melakukan pengajuan Medical Check-up. Jika ada suatu kendala Silahkan hubungi nomor ini 0819-1184-6045.");
+            this.reset(); 
+        }
         localStorage.setItem(DB_RECORDS, JSON.stringify(records));
-        alert("Berhasil!"); this.reset(); loadData();
+        openTab('status-saya');
     };
 
     function loadData() {
+        if(!currentUser) return;
         const isAdmin = currentUser.role === 'admin';
         const q = document.getElementById('search').value.toLowerCase();
 
-        if(isAdmin) {
-            // Antrean (Terbaru ke Terlama)
-            const pending = records.filter(i => i.status === 'pending').sort((a,b) => b.timestamp - a.timestamp);
-            document.getElementById('listPending').innerHTML = pending.map(i => `
-                <tr><td>${i.tglInput}</td><td>${i.nama}</td><td>${i.kumiai}</td><td>${i.tipe}</td>
-                <td><button class="btn btn-success" onclick="approve(${i.id})">APPROVE</button></td></tr>`).join('');
-
-            // DB Akun (A-Z)
-            const sortedUsers = [...users].sort((a,b) => a.name.localeCompare(b.name));
-            document.getElementById('listUser').innerHTML = sortedUsers.map(u => `
-                <tr><td>${u.name}</td><td>${u.email}</td><td>${u.phone}</td><td>${u.u}</td>
-                <td><button class="btn btn-danger" onclick="hapusUser('${u.u}')">HAPUS</button></td></tr>`).join('');
+        const myRecords = records.filter(i => i.owner === currentUser.u).sort((a,b) => b.timestamp - a.timestamp);
+        if(myRecords.length === 0) {
+            document.getElementById('myStatusContent').innerHTML = `<div class="empty-state">Belum ada pengajuan MCU, Silahkan isi pengajuan MCU terlebih dahulu!</div>`;
+        } else {
+            let html = `<table><thead><tr><th>Tgl Daftar</th><th>Klinik</th><th>Kumiai</th><th>Jenis MCU</th><th>Status</th><th>Opsi</th></tr></thead><tbody>`;
+            myRecords.forEach(i => {
+                let badgeStatus = i.status === 'pending' ? '<span class="badge wait" style="background:#f39c12">Menunggu Admin</span>' : '<span class="badge fit">Di-Approve</span>';
+                let btnOps = i.status === 'pending' ? `<button class="btn btn-warning btn-sm" onclick="editPengajuan(${i.id})">Edit</button> <button class="btn btn-danger btn-sm" onclick="batalPengajuan(${i.id})">Batal</button>` : `<span style="font-size:11px; color:#7f8c8d; font-style:italic">Terkunci</span>`;
+                html += `<tr><td>${i.tglInput}</td><td><b>${i.klinik}</b></td><td>${i.kumiai}</td><td>${i.tipe.split(' (')[0]}</td><td>${badgeStatus}</td><td>${btnOps}</td></tr>`;
+            });
+            html += `</tbody></table>`;
+            document.getElementById('myStatusContent').innerHTML = html;
         }
 
-        // Hasil (A-Z)
+        if(isAdmin) {
+            const pending = records.filter(i => i.status === 'pending').sort((a,b) => b.timestamp - a.timestamp);
+            document.getElementById('listPending').innerHTML = pending.map(i => `<tr><td>${i.tglInput}</td><td>${i.nama}</td><td><small>${i.klinik}</small></td><td>${i.kumiai}</td><td>${i.tipe.split(' (')[0]}</td><td><button class="btn btn-success" onclick="approve(${i.id})">APPROVE</button></td></tr>`).join('');
+            const sortedUsers = [...users].sort((a,b) => a.name.localeCompare(b.name));
+            document.getElementById('listUser').innerHTML = sortedUsers.map(u => `<tr><td>${u.name}</td><td>${u.email}</td><td>${u.phone}</td><td>${u.u}</td><td><button class="btn btn-danger" onclick="hapusUser('${u.u}')">HAPUS</button></td></tr>`).join('');
+        }
+
         let approved = records.filter(i => i.status === 'approved' && i.nama.toLowerCase().includes(q)).sort((a,b) => a.nama.localeCompare(b.nama));
         document.getElementById('listHasil').innerHTML = approved.map(i => {
             const noBlur = isAdmin || (i.owner === currentUser.u);
             const blur = noBlur ? '' : 'blur-text';
             const hClass = i.hasil.includes('Fit to Work') ? 'fit' : (i.hasil.includes('Note') ? 'note' : (i.hasil.includes('Unfit') ? 'unfit' : 'wait'));
-            return `<tr><td>${i.tglApp}</td><td><b>${i.tglMcu}</b></td><td>${i.nama}</td><td class="${blur}">${i.noHp}</td>
-                <td>${i.kumiai}</td><td>${i.tipe}</td><td><span class="badge ${hClass} ${blur}">${i.hasil}</span></td>
-                <td style="${isAdmin?'':'display:none'}"><button class="btn btn-success" onclick="setHasil(${i.id})">HASIL</button></td></tr>`;
+            return `<tr><td>${i.tglApp}</td><td><b>${i.tglMcu}</b></td><td>${i.nama}</td><td class="${blur}">${i.noHp}</td><td><small>${i.klinik}</small></td><td>${i.kumiai}</td><td>${i.tipe.split(' (')[0]}</td><td><span class="badge ${hClass} ${blur}">${i.hasil}</span></td><td style="${isAdmin?'':'display:none'}"><button class="btn btn-success" onclick="setHasil(${i.id})">HASIL</button></td></tr>`;
         }).join('');
     }
 
+    function editPengajuan(id) {
+        const data = records.find(i => i.id === id);
+        if(!data) return;
+        currentEditId = id;
+        document.getElementById('nama').value = data.nama;
+        document.getElementById('noHp').value = data.noHp;
+        document.getElementById('tglLahir').value = data.tglLahir;
+        document.getElementById('kumiai').value = data.kumiai;
+        document.getElementById('klinik').value = data.klinik;
+        document.getElementById('tipeMcu').value = data.tipe;
+        document.getElementById('btnSubmitForm').innerText = "UPDATE PENGAJUAN";
+        document.getElementById('btnSubmitForm').className = "btn btn-warning";
+        document.getElementById('btnBatalEdit').style.display = 'inline-block';
+        openTab('pengajuan');
+    }
+
+    function batalModeEdit() {
+        currentEditId = null;
+        document.getElementById('formMcu').reset();
+        document.getElementById('btnSubmitForm').innerText = "SIMPAN PENGAJUAN";
+        document.getElementById('btnSubmitForm').className = "btn btn-primary";
+        document.getElementById('btnBatalEdit').style.display = 'none';
+        openTab('status-saya');
+    }
+
+    function batalPengajuan(id) {
+        if(confirm("Hapus pengajuan ini?")) {
+            records = records.filter(i => i.id !== id);
+            localStorage.setItem(DB_RECORDS, JSON.stringify(records));
+            loadData();
+        }
+    }
+
     function approve(id) {
-        const tgl = prompt("Tgl MCU:"); if(!tgl) return;
+        const tgl = prompt("Tanggal Pelaksanaan MCU:"); if(!tgl) return;
         const idx = records.findIndex(i => i.id === id);
         records[idx].status = 'approved'; records[idx].tglMcu = tgl; records[idx].tglApp = new Date().toLocaleDateString('id-ID');
         localStorage.setItem(DB_RECORDS, JSON.stringify(records)); loadData();
@@ -273,7 +371,7 @@
     }
 
     function hapusUser(username) {
-        if(confirm("Hapus akun?")) {
+        if(confirm("Hapus akun ini?")) {
             users = users.filter(u => u.u !== username);
             localStorage.setItem(DB_USERS, JSON.stringify(users)); loadData();
         }
