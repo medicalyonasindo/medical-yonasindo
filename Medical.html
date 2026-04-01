@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem MCU LPK Yonasindo</title>
+    <!-- Tailwind CSS untuk desain responsif dan warna -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Pengaturan warna hijau khusus */
+        :root {
+            --yonasindo-green: #15803d; /* Hijau utama */
+            --yonasindo-light: #dcfce7; /* Hijau muda untuk background */
+        }
+        body {
+            background-color: #f0fdf4;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        /* Menyembunyikan elemen yang tidak aktif */
+        .hidden-page { display: none !important; }
+        
+        /* Loading animation untuk Chatbot */
+        .loader-dots div {
+            animation-timing-function: cubic-bezier(0, 1, 1, 0);
+        }
+        .loader-dots div:nth-child(1) { left: 8px; animation: loader-dots1 0.6s infinite; }
+        .loader-dots div:nth-child(2) { left: 8px; animation: loader-dots2 0.6s infinite; }
+        .loader-dots div:nth-child(3) { left: 32px; animation: loader-dots2 0.6s infinite; }
+        .loader-dots div:nth-child(4) { left: 56px; animation: loader-dots3 0.6s infinite; }
+        @keyframes loader-dots1 { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        @keyframes loader-dots3 { 0% { transform: scale(1); } 100% { transform: scale(0); } }
+        @keyframes loader-dots2 { 0% { transform: translate(0, 0); } 100% { transform: translate(24px, 0); } }
+    </style>
+</head>
+<body class="text-gray-800 h-screen flex flex-col md:flex-row">
+
+    <!-- ========================================== -->
+    <!-- BAGIAN 1: HALAMAN LOGIN & DAFTAR (AWAL)    -->
+    <!-- ========================================== -->
+    <div id="auth-page" class="flex-1 flex items-center justify-center p-4 min-h-screen w-full bg-green-50">
+        <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md border-t-4 border-green-700">
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-bold text-green-700">Portal MCU</h1>
+                <p class="text-sm text-gray-500">LPK Yonasindo Intra Pratama</p>
+            </div>
+
+            <!-- Form Login -->
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-1">Username</label>
+                    <input type="text" id="login-username" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold mb-1">Password</label>
+                    <input type="password" id="login-password" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+                <button type="submit" class="w-full bg-green-600 text-white font-bold py-2 rounded-lg hover:bg-green-700 transition">MASUK</button>
+                <p class="text-center text-sm mt-4">Belum punya akun? <a href="#" onclick="toggleAuth('register')" class="text-green-600 font-bold">Daftar di sini</a></p>
+            </form>
+
+            <!-- Form Daftar (Siswa) -->
+            <form id="register-form" onsubmit="handleRegister(event)" class="hidden-page">
+                <div class="mb-3">
+                    <label class="block text-sm font-semibold mb-1">Nama Lengkap (Sesuai KTP)</label>
+                    <input type="text" id="reg-name" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+                <div class="mb-3">
+                    <label class="block text-sm font-semibold mb-1">Nomor Handphone</label>
+                    <input type="number" id="reg-phone" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+                <div class="mb-3">
+                    <label class="block text-sm font-semibold mb-1">Email</label>
+                    <input type="email" id="reg-email" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+                <div class="mb-3">
+                    <label class="block text-sm font-semibold mb-1">Username</label>
+                    <input type="text" id="reg-username" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+                <div class="mb-5">
+                    <label class="block text-sm font-semibold mb-1">Password</label>
+                    <input type="password" id="reg-password" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+                <button type="submit" class="w-full bg-green-600 text-white font-bold py-2 rounded-lg hover:bg-green-700 transition">DAFTAR SEKARANG</button>
+                <p class="text-center text-sm mt-4">Sudah punya akun? <a href="#" onclick="toggleAuth('login')" class="text-green-600 font-bold">Masuk di sini</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- BAGIAN 2: DASHBOARD (MUNCUL SETELAH LOGIN) -->
+    <!-- ========================================== -->
+    
+    <!-- Sidebar / Menu Mobile -->
+    <div id="sidebar" class="hidden-page w-full md:w-64 bg-green-800 text-white md:h-screen flex-shrink-0 flex flex-col">
+        <div class="p-4 text-center border-b border-green-700">
+            <h2 class="font-bold text-xl">Divisi Medical</h2>
+            <p class="text-xs text-green-300">LPK Yonasindo</p>
+        </div>
+        
+        <div class="p-4 text-sm bg-green-900">
+            <p>Halo, <b id="display-user-name">User</b></p>
+            <p class="text-xs text-green-300" id="display-user-role">Siswa</p>
+        </div>
+
+        <!-- Menu Untuk Siswa -->
+        <nav id="menu-siswa" class="flex-1 p-2 space-y-1 hidden-page flex flex-col md:flex-col">
+            <button onclick="changePage('siswa-home')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-green-700">🏠 Home (Pengajuan)</button>
+            <button onclick="changePage('siswa-pengajuan')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-green-700">📋 Pengajuan saya</button>
+            <button onclick="changePage('siswa-hasil')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-green-700">🩺 Hasil MCU</button>
+            <button onclick="changePage('siswa-ai')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-green-700 font-bold text-green-200 bg-green-900/50 mt-4 border border-green-600">✨ Asisten AI MCU</button>
+        </nav>
+
+        <!-- Menu Untuk Admin -->
+        <nav id="menu-admin" class="flex-1 p-2 space-y-1 hidden-page flex flex-col md:flex-col">
+            <button onclick="changePage('admin-persetujuan')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-green-700">🔔 Persetujuan MCU</button>
+            <button onclick="changePage('admin-hasil')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-green-700">📝 Input & Hasil MCU</button>
+        </nav>
+
+        <div class="p-4 border-t border-green-700">
+            <button onclick="handleLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg transition">Keluar</button>
+        </div>
+    </div>
+
+    <!-- Konten Utama -->
+    <div id="main-content" class="hidden-page flex-1 h-screen overflow-y-auto bg-gray-50 p-4 md:p-8">
+        
+        <!-- ======================= -->
+        <!-- HALAMAN SISWA           -->
+        <!-- ======================= -->
+        
+        <!-- Halaman Home Siswa (Form Pengajuan) -->
+        <div id="page-siswa-home" class="hidden-page max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <h2 class="text-2xl font-bold text-green-700 mb-6 border-b pb-2">Form Pengajuan MCU</h2>
+            <form onsubmit="submitMCU(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Nama Lengkap (Sesuai KTP)</label>
+                    <input type="text" id="mcu-name" required class="w-full px-3 py-2 border rounded-lg bg-gray-100" readonly>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Nomor Handphone</label>
+                    <input type="number" id="mcu-phone" required class="w-full px-3 py-2 border rounded-lg bg-gray-100" readonly>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Tanggal Lahir</label>
+                    <input type="date" id="mcu-dob" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Kumiai</label>
+                    <input type="text" id="mcu-kumiai" placeholder="Masukkan nama Kumiai" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Pilih Klinik</label>
+                    <select id="mcu-klinik" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 bg-white">
+                        <option value="">-- Pilih Klinik --</option>
+                        <option value="Klinik Galaxy Medical Center">Klinik Galaxy Medical Center</option>
+                        <option value="Klinik Rosela Indah Medical Center">Klinik Rosela Indah Medical Center</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Paket Pemeriksaan</label>
+                    <select id="mcu-paket" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 bg-white">
+                        <option value="">-- Pilih Paket --</option>
+                        <option value="MCU Pra">MCU Pra (Siswa baru masuk ke LPK Yonasindo)</option>
+                        <option value="MCU Full">MCU Full (Siswa lolos mensetsu/matching job)</option>
+                        <option value="MCU Akhir">MCU Akhir (CoE/Penerbangan)</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 mt-4 shadow-md">AJUKAN MEDICAL CHECKUP</button>
+            </form>
+        </div>
+
+        <!-- Halaman Pengajuan Saya -->
+        <div id="page-siswa-pengajuan" class="hidden-page max-w-3xl mx-auto">
+            <h2 class="text-2xl font-bold text-green-700 mb-6 border-b pb-2">Pengajuan Saya</h2>
+            <div id="container-pengajuan-saya" class="space-y-4">
+                <!-- Konten akan diisi oleh JavaScript -->
+            </div>
+        </div>
+
+        <!-- Halaman Hasil MCU Siswa -->
+        <div id="page-siswa-hasil" class="hidden-page max-w-4xl mx-auto">
+            <h2 class="text-2xl font-bold text-green-700 mb-6 border-b pb-2">Database Hasil MCU</h2>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-green-100">
+                        <tr>
+                            <th class="p-3 border-b border-green-200">Tanggal</th>
+                            <th class="p-3 border-b border-green-200">Nama Siswa</th>
+                            <th class="p-3 border-b border-green-200">Klinik & Paket</th>
+                            <th class="p-3 border-b border-green-200 text-center">Hasil MCU</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-siswa-hasil" class="divide-y divide-gray-100">
+                        <!-- Konten akan diisi oleh JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Halaman Asisten AI (GEMINI) -->
+        <div id="page-siswa-ai" class="hidden-page max-w-3xl mx-auto flex flex-col h-[85vh]">
+            <h2 class="text-2xl font-bold text-green-700 mb-2 border-b pb-2 flex items-center gap-2">
+                ✨ Asisten Persiapan MCU
+            </h2>
+            <p class="text-sm text-gray-600 mb-4">Tanyakan apa saja ke AI kami seputar persiapan MCU Anda (puasa, jam tidur, makanan yang dihindari, dll).</p>
+            
+            <div id="chat-history" class="flex-1 overflow-y-auto bg-white p-4 rounded-xl shadow-sm border border-green-200 mb-4 flex flex-col space-y-4">
+                <div class="bg-green-100 text-green-800 p-3 rounded-2xl rounded-tl-sm max-w-[85%] self-start shadow-sm text-sm md:text-base">
+                    Halo! Saya Asisten Medis AI dari LPK Yonasindo. Ada yang bisa saya bantu untuk mempersiapkan Medical Checkup Anda hari ini? 👩‍⚕️
+                </div>
+            </div>
+            
+            <form id="chat-form" onsubmit="handleChatSubmit(event)" class="flex gap-2">
+                <input type="text" id="chat-input" placeholder="Contoh: Apakah saya harus puasa sebelum MCU Full?" class="flex-1 px-4 py-3 border border-green-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm" required autocomplete="off">
+                <button type="submit" id="chat-submit-btn" class="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 font-bold transition shadow-sm flex items-center justify-center min-w-[100px]">
+                    Kirim
+                </button>
+            </form>
+        </div>
+
+
+        <!-- ======================= -->
+        <!-- HALAMAN ADMIN           -->
+        <!-- ======================= -->
+        
+        <!-- Halaman Persetujuan Admin -->
+        <div id="page-admin-persetujuan" class="hidden-page max-w-4xl mx-auto">
+            <h2 class="text-2xl font-bold text-green-700 mb-6 border-b pb-2">Menunggu Persetujuan</h2>
+            <div id="container-admin-persetujuan" class="space-y-4">
+                <!-- Konten akan diisi oleh JavaScript -->
+            </div>
+        </div>
+
+        <!-- Halaman Input Hasil MCU Admin -->
+        <div id="page-admin-hasil" class="hidden-page max-w-5xl mx-auto">
+            <h2 class="text-2xl font-bold text-green-700 mb-6 border-b pb-2">Input Hasil MCU Siswa</h2>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-green-100">
+                        <tr>
+                            <th class="p-3 border-b border-green-200">ID / Tgl</th>
+                            <th class="p-3 border-b border-green-200">Siswa & Kumiai</th>
+                            <th class="p-3 border-b border-green-200">Klinik & Paket</th>
+                            <th class="p-3 border-b border-green-200 text-center">Update Hasil</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-admin-hasil" class="divide-y divide-gray-100">
+                        <!-- Konten akan diisi oleh JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- LOGIKA JAVASCRIPT & DATABASE SEMENTARA     -->
+    <!-- ========================================== -->
+    <script>
+        // =========================================================================
+        // 🔴 AREA API GOOGLE SHEETS (UNTUK NANTI)
+        // Saat ini aplikasi menggunakan localStorage (memori HP/Komputer) agar 
+        // Anda bisa mencoba tampilannya sekarang juga tanpa error.
+        // Nanti, ketika Anda sudah punya link App Script dari Google Sheets,
+        // masukkan link-nya ke variabel di bawah ini.
+        // =========================================================================
+        const GOOGLE_SHEETS_API_URL = ""; // <-- CONTOH: "https://script.google.com/macros/s/AKfycb.../exec"
+        
+        // =========================================================================
+        // DATABASE SEMENTARA (MENGGUNAKAN LOCALSTORAGE BROWSER)
+        // =========================================================================
+        // Sesuai Sheet 1: name, u, p, email, phone
+        let usersDB = JSON.parse(localStorage.getItem('mcu_users')) || [];
+        // Sesuai Sheet 2: id, owner, nohp, kumiai, klinik, tipe, status, hasil, tglMcu, tglInput, timestamp
+        let recordsDB = JSON.parse(localStorage.getItem('mcu_records')) || [];
+        
+        let currentUser = null; // Menyimpan data user yang sedang login
+
+        // Fungsi menyimpan ke memori (Ini yang nanti diganti dengan kode API Google Sheets)
+        function saveToDatabase() {
+            localStorage.setItem('mcu_users', JSON.stringify(usersDB));
+            localStorage.setItem('mcu_records', JSON.stringify(recordsDB));
+        }
+
+        // =========================================================================
+        // LOGIKA TAMPILAN (UI)
+        // =========================================================================
+        
+        // Pindah antara Login dan Register
+        function toggleAuth(type) {
+            document.getElementById('login-form').classList.toggle('hidden-page', type !== 'login');
+            document.getElementById('register-form').classList.toggle('hidden-page', type !== 'register');
+        }
+
+        // Pindah Menu (Page)
+        function changePage(pageId) {
+            // Sembunyikan semua page termasuk page AI
+            const pages = ['page-siswa-home', 'page-siswa-pengajuan', 'page-siswa-hasil', 'page-siswa-ai', 'page-admin-persetujuan', 'page-admin-hasil'];
+            pages.forEach(p => document.getElementById(p).classList.add('hidden-page'));
+            
+            // Tampilkan page yang dipilih
+            document.getElementById('page-' + pageId).classList.remove('hidden-page');
+
+            // Render ulang data sesuai halaman yang dibuka
+            if (pageId === 'siswa-pengajuan') renderSiswaPengajuan();
+            if (pageId === 'siswa-hasil') renderSiswaHasil();
+            if (pageId === 'admin-persetujuan') renderAdminPersetujuan();
+            if (pageId === 'admin-hasil') renderAdminHasil();
+        }
+
+        // =========================================================================
+        // LOGIKA AUTENTIKASI (LOGIN & DAFTAR)
+        // =========================================================================
+
+        function handleRegister(e) {
+            e.preventDefault(); // Mencegah layar refresh
+            const name = document.getElementById('reg-name').value;
+            const phone = document.getElementById('reg-phone').value;
+            const email = document.getElementById('reg-email').value;
+            const u = document.getElementById('reg-username').value;
+            const p = document.getElementById('reg-password').value;
+
+            // Cek apakah username sudah ada
+            if (usersDB.find(user => user.u === u)) {
+                alert("Username sudah digunakan! Silakan pilih yang lain.");
+                return;
+            }
+
+            // Simpan data (Sheet 1)
+            usersDB.push({ name, u, p, email, phone });
+            saveToDatabase();
+            
+            alert("Pendaftaran berhasil! Silakan login.");
+            toggleAuth('login');
+            document.getElementById('register-form').reset();
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('login-username').value;
+            const p = document.getElementById('login-password').value;
+
+            // 1. Cek jika yang login Admin (Username & Password tetap)
+            if (u === 'adminmcuyonasindo' && p === 'admin') {
+                currentUser = { role: 'admin', name: 'Administrator MCU' };
+                loginSuccess();
+                return;
+            }
+
+            // 2. Cek jika yang login Siswa
+            const foundUser = usersDB.find(user => user.u === u && user.p === p);
+            if (foundUser) {
+                currentUser = { role: 'siswa', ...foundUser }; // Gabungkan data user
+                loginSuccess();
+            } else {
+                alert("Username atau Password salah!");
+            }
+        }
+
+        function loginSuccess() {
+            // Sembunyikan form login, tampilkan dashboard
+            document.getElementById('auth-page').classList.add('hidden-page');
+            document.getElementById('sidebar').classList.remove('hidden-page');
+            document.getElementById('main-content').classList.remove('hidden-page');
+
+            // Setel nama di sidebar
+            document.getElementById('display-user-name').innerText = currentUser.name;
+            document.getElementById('display-user-role').innerText = currentUser.role === 'admin' ? 'Admin / Petugas' : 'Siswa';
+
+            // Atur menu yang tampil
+            if (currentUser.role === 'admin') {
+                document.getElementById('menu-admin').classList.remove('hidden-page');
+                changePage('admin-persetujuan'); // Halaman pertama admin
+            } else {
+                document.getElementById('menu-siswa').classList.remove('hidden-page');
+                document.getElementById('mcu-name').value = currentUser.name; // Isi otomatis form pengajuan
+                document.getElementById('mcu-phone').value = currentUser.phone;
+                changePage('siswa-home'); // Halaman pertama siswa
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            document.getElementById('login-form').reset();
+            
+            // Sembunyikan dashboard, kembalikan ke login
+            document.getElementById('auth-page').classList.remove('hidden-page');
+            document.getElementById('sidebar').classList.add('hidden-page');
+            document.getElementById('main-content').classList.add('hidden-page');
+            document.getElementById('menu-admin').classList.add('hidden-page');
+            document.getElementById('menu-siswa').classList.add('hidden-page');
+        }
+
+        // =========================================================================
+        // LOGIKA SISWA
+        // =========================================================================
+
+        function submitMCU(e) {
+            e.preventDefault();
+            
+            // Ambil data form (Sesuai kolom Sheet 2)
+            const newRecord = {
+                id: "MCU-" + Date.now(), // ID unik otomatis
+                owner: currentUser.name,
+                nohp: currentUser.phone,
+                kumiai: document.getElementById('mcu-kumiai').value,
+                klinik: document.getElementById('mcu-klinik').value,
+                tipe: document.getElementById('mcu-paket').value,
+                status: "Menunggu Persetujuan", // Status Awal
+                hasil: "-", // Belum ada hasil
+                tglMcu: document.getElementById('mcu-dob').value, // Tgl Lahir / Tgl MCU
+                tglInput: "", // Diisi admin nanti
+                timestamp: new Date().toLocaleString()
+            };
+
+            recordsDB.push(newRecord);
+            saveToDatabase();
+            
+            alert("Pengajuan MCU berhasil dibuat!");
+            document.getElementById('mcu-kumiai').value = '';
+            changePage('siswa-pengajuan');
+        }
+
+        function renderSiswaPengajuan() {
+            const container = document.getElementById('container-pengajuan-saya');
+            container.innerHTML = ''; // Kosongkan dulu
+
+            // Cari pengajuan milik siswa ini
+            const myRequests = recordsDB.filter(rec => rec.owner === currentUser.name);
+
+            // JIKA KOSONG (Sesuai instruksi Anda)
+            if (myRequests.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200">
+                        <b>Anda belum mengajukan pengajuan MCU, Silahkan buat pengajuan MCU terlebih dahulu!</b>
+                    </div>
+                `;
+                return;
+            }
+
+            // Jika ada, tampilkan
+            myRequests.forEach(req => {
+                let statusColor = req.status === 'Disetujui' ? 'text-green-600 bg-green-100' : 'text-yellow-600 bg-yellow-100';
+                
+                container.innerHTML += `
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                        <div class="flex flex-col md:flex-row justify-between md:items-center">
+                            <div>
+                                <h3 class="font-bold text-lg">${req.tipe}</h3>
+                                <p class="text-sm text-gray-600">${req.klinik} | Kumiai: ${req.kumiai}</p>
+                                <p class="text-xs text-gray-400 mt-1">Diajukan: ${req.timestamp}</p>
+                            </div>
+                            <div class="mt-3 md:mt-0">
+                                <span class="px-3 py-1 text-sm font-bold rounded-full ${statusColor}">${req.status}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderSiswaHasil() {
+            const table = document.getElementById('table-siswa-hasil');
+            table.innerHTML = ''; // Kosongkan
+
+            // Ambil data yang sudah "Disetujui" oleh admin
+            const approvedRecords = recordsDB.filter(rec => rec.status === 'Disetujui');
+
+            if (approvedRecords.length === 0) {
+                table.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500">Belum ada database hasil MCU</td></tr>`;
+                return;
+            }
+
+            approvedRecords.forEach(req => {
+                // SENSOR PRIVASI ****
+                // Jika milik sendiri, tampilkan hasil. Jika milik orang lain, berikan ****
+                let tampilanHasil = (req.owner === currentUser.name) ? req.hasil : "****";
+                
+                // Beri warna background khusus untuk data milik sendiri
+                let rowBg = (req.owner === currentUser.name) ? 'bg-green-50' : '';
+
+                // Warna teks hasil
+                let badgeClass = "bg-gray-100 text-gray-600";
+                if(tampilanHasil === "FIT TO WORK") badgeClass = "bg-green-100 text-green-700 font-bold";
+                if(tampilanHasil === "FIT WITH NOTE") badgeClass = "bg-yellow-100 text-yellow-700 font-bold";
+                if(tampilanHasil === "UNFIT") badgeClass = "bg-red-100 text-red-700 font-bold";
+                if(tampilanHasil === "-") {
+                     tampilanHasil = "Menunggu";
+                     badgeClass = "bg-blue-100 text-blue-700";
+                }
+
+                table.innerHTML += `
+                    <tr class="${rowBg}">
+                        <td class="p-3 text-sm">${req.timestamp.split(',')[0]}</td>
+                        <td class="p-3 font-semibold text-sm">
+                            ${req.owner} 
+                            ${req.owner === currentUser.name ? '<span class="ml-2 text-xs bg-green-200 text-green-800 px-2 rounded-full">Anda</span>' : ''}
+                        </td>
+                        <td class="p-3 text-sm">${req.klinik}<br><span class="text-xs text-gray-500">${req.tipe}</span></td>
+                        <td class="p-3 text-center">
+                            <span class="px-2 py-1 rounded text-xs ${tampilanHasil === '****' ? 'bg-gray-200 text-gray-500 tracking-widest' : badgeClass}">
+                                ${tampilanHasil}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // =========================================================================
+        // LOGIKA ADMIN
+        // =========================================================================
+
+        function renderAdminPersetujuan() {
+            const container = document.getElementById('container-admin-persetujuan');
+            container.innerHTML = '';
+
+            const pendingRecords = recordsDB.filter(rec => rec.status === 'Menunggu Persetujuan');
+
+            if (pendingRecords.length === 0) {
+                container.innerHTML = `<div class="p-4 text-center text-gray-500 bg-white rounded-lg border">Tidak ada pengajuan MCU baru.</div>`;
+                return;
+            }
+
+            pendingRecords.forEach(req => {
+                container.innerHTML += `
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col md:flex-row justify-between md:items-center">
+                        <div>
+                            <h3 class="font-bold text-lg">${req.owner}</h3>
+                            <p class="text-sm text-gray-600">No. HP: ${req.nohp} | Kumiai: ${req.kumiai}</p>
+                            <p class="text-sm text-gray-600 font-medium mt-1">Paket: ${req.tipe} di ${req.klinik}</p>
+                        </div>
+                        <button onclick="approveRecord('${req.id}')" class="mt-3 md:mt-0 px-4 py-2 bg-green-600 text-white font-bold rounded hover:bg-green-700 transition">
+                            Setujui Pengajuan
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        function approveRecord(id) {
+            // Cari data, ubah status
+            let rec = recordsDB.find(r => r.id === id);
+            if (rec) {
+                rec.status = 'Disetujui';
+                saveToDatabase();
+                alert('Pengajuan disetujui! Data berpindah ke menu Hasil MCU.');
+                renderAdminPersetujuan(); // Refresh tampilan
+            }
+        }
+
+        function renderAdminHasil() {
+            const table = document.getElementById('table-admin-hasil');
+            table.innerHTML = '';
+
+            const approvedRecords = recordsDB.filter(rec => rec.status === 'Disetujui');
+
+            if (approvedRecords.length === 0) {
+                table.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500">Belum ada pengajuan yang disetujui.</td></tr>`;
+                return;
+            }
+
+            approvedRecords.forEach(req => {
+                let badgeClass = "bg-gray-100 text-gray-600";
+                if(req.hasil === "FIT TO WORK") badgeClass = "bg-green-100 text-green-700";
+                if(req.hasil === "FIT WITH NOTE") badgeClass = "bg-yellow-100 text-yellow-700";
+                if(req.hasil === "UNFIT") badgeClass = "bg-red-100 text-red-700";
+
+                table.innerHTML += `
+                    <tr>
+                        <td class="p-3 text-xs text-gray-500">${req.id}<br>${req.timestamp.split(',')[0]}</td>
+                        <td class="p-3 font-semibold text-sm">${req.owner}<br><span class="font-normal text-xs text-gray-500">Kumiai: ${req.kumiai}</span></td>
+                        <td class="p-3 text-sm">${req.klinik}<br><span class="text-xs text-gray-500">${req.tipe}</span></td>
+                        <td class="p-3 text-center">
+                            <select onchange="updateHasilMCU('${req.id}', this.value)" class="p-1 border rounded text-sm focus:ring-green-500 ${badgeClass}">
+                                <option value="-" ${req.hasil === '-' ? 'selected' : ''}>Pilih Hasil</option>
+                                <option value="FIT TO WORK" ${req.hasil === 'FIT TO WORK' ? 'selected' : ''}>FIT TO WORK</option>
+                                <option value="FIT WITH NOTE" ${req.hasil === 'FIT WITH NOTE' ? 'selected' : ''}>FIT WITH NOTE</option>
+                                <option value="UNFIT" ${req.hasil === 'UNFIT' ? 'selected' : ''}>UNFIT</option>
+                            </select>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function updateHasilMCU(id, nilaiHasil) {
+            let rec = recordsDB.find(r => r.id === id);
+            if (rec) {
+                rec.hasil = nilaiHasil;
+                rec.tglInput = new Date().toLocaleString(); // Menyimpan kapan admin isi
+                saveToDatabase();
+                
+                // Ubah warna dropdown langsung setelah diubah
+                renderAdminHasil();
+            }
+        }
+
+        // =========================================================================
+        // LOGIKA INTEGRASI GEMINI API (ASISTEN AI)
+        // =========================================================================
+        
+        const chatHistoryContainer = document.getElementById('chat-history');
+        
+        async function handleChatSubmit(e) {
+            e.preventDefault();
+            const inputEl = document.getElementById('chat-input');
+            const submitBtn = document.getElementById('chat-submit-btn');
+            
+            const userText = inputEl.value.trim();
+            if (!userText) return;
+
+            // Tambahkan pesan user ke UI
+            appendChatMessage(userText, 'user');
+            inputEl.value = '';
+            
+            // Tampilkan loading & matikan input sementara
+            inputEl.disabled = true;
+            submitBtn.disabled = true;
+            const loadingId = appendLoading();
+
+            try {
+                // Panggil Gemini API
+                const aiResponse = await callGeminiAPI(userText);
+                removeLoading(loadingId);
+                appendChatMessage(aiResponse, 'ai');
+            } catch (error) {
+                removeLoading(loadingId);
+                appendChatMessage("Maaf, sepertinya koneksi ke AI sedang bermasalah. Silakan coba lagi nanti.", 'error');
+            } finally {
+                inputEl.disabled = false;
+                submitBtn.disabled = false;
+                inputEl.focus();
+            }
+        }
+
+        function appendChatMessage(text, sender) {
+            const div = document.createElement('div');
+            
+            // Ganti format markdown sederhana ke HTML (bolding)
+            const formattedText = text
+                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+                .replace(/\*(.*?)\*/g, '<i>$1</i>')
+                .replace(/\n/g, '<br>');
+
+            if (sender === 'user') {
+                div.className = "bg-green-600 text-white p-3 rounded-2xl rounded-tr-sm max-w-[85%] self-end shadow-sm text-sm md:text-base ml-auto";
+                div.innerHTML = formattedText;
+            } else if (sender === 'ai') {
+                div.className = "bg-green-100 text-green-800 p-3 rounded-2xl rounded-tl-sm max-w-[85%] self-start shadow-sm text-sm md:text-base";
+                div.innerHTML = formattedText;
+            } else {
+                // error message
+                div.className = "bg-red-100 text-red-800 p-3 rounded-2xl max-w-[85%] self-center mx-auto text-sm text-center";
+                div.innerHTML = text;
+            }
+            
+            chatHistoryContainer.appendChild(div);
+            chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+        }
+
+        function appendLoading() {
+            const id = 'loading-' + Date.now();
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = "bg-green-100 p-4 rounded-2xl rounded-tl-sm max-w-[85px] self-start shadow-sm flex items-center h-[48px]";
+            
+            // Animasi loading sederhana (loader-dots)
+            div.innerHTML = `
+                <div class="loader-dots relative w-12 h-4">
+                    <div class="absolute top-0 mt-1 w-2 h-2 rounded-full bg-green-600"></div>
+                    <div class="absolute top-0 mt-1 w-2 h-2 rounded-full bg-green-600"></div>
+                    <div class="absolute top-0 mt-1 w-2 h-2 rounded-full bg-green-600"></div>
+                    <div class="absolute top-0 mt-1 w-2 h-2 rounded-full bg-green-600"></div>
+                </div>
+            `;
+            chatHistoryContainer.appendChild(div);
+            chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+            return id;
+        }
+
+        function removeLoading(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
+        // Fungsi fetch utama ke Gemini dengan Retry-Backoff System
+        async function callGeminiAPI(prompt) {
+            // API Key disediakan oleh runtime environment, tidak perlu divalidasi
+            const apiKey = ""; 
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            
+            // System instruction spesifik untuk membatasi AI sebagai asisten medis MCU
+            const systemPrompt = "Anda adalah asisten medis virtual yang ramah dan membantu untuk siswa-siswa di LPK Yonasindo Intra Pratama. Jawablah pertanyaan seputar persiapan Medical Checkup (MCU) seperti: apakah perlu puasa, pantangan makanan sebelum cek, dokumen yang dibawa, dan tips gaya hidup sehat agar lulus MCU. Gunakan bahasa Indonesia yang santai, memotivasi, tapi tetap profesional. Jika siswa bertanya hal yang terlalu detail mengenai penyakit atau resep obat, beri tahu mereka bahwa Anda hanya Asisten Persiapan MCU dan sarankan untuk konsultasi langsung ke klinik.";
+            
+            let retries = 5;
+            let delay = 1000;
+            
+            while (retries > 0) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: prompt }] }],
+                            systemInstruction: { parts: [{ text: systemPrompt }] }
+                        })
+                    });
+                    
+                    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                    
+                    const data = await response.json();
+                    return data.candidates[0].content.parts[0].text;
+                } catch (error) {
+                    retries--;
+                    if (retries === 0) throw error;
+                    await new Promise(res => setTimeout(res, delay));
+                    delay *= 2; // Exponential backoff (1s, 2s, 4s, 8s, 16s)
+                }
+            }
+        }
+
+    </script>
+</body>
+</html>
