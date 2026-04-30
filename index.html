@@ -3,721 +3,2082 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem MCU LPK Yonasindo</title>
-    <!-- Tailwind CSS untuk desain responsif dan warna -->
+    <title>Portal MCU LPK Yonasindo Intra Pratama</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1C3B2B',   /* Deep Forest Green - Aura Style */
+                        secondary: '#2E5A41', /* Soft Green */
+                        accent: '#D8E2DC',    /* Mint / Pastel Green */
+                        bglight: '#F4F2ED',   /* Warm Sand / Cream Background */
+                        card: '#FFFFFF'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'spin-slow': 'spin 8s linear infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-15px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        /* Pengaturan warna hijau khusus */
-        :root {
-            --yonasindo-green: #15803d; /* Hijau utama */
-            --yonasindo-light: #dcfce7; /* Hijau muda untuk background */
-        }
-        body {
-            background-color: #f0fdf4;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        /* Menyembunyikan elemen yang tidak aktif */
-        .hidden-page { display: none !important; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
-        /* Loading animation untuk Chatbot */
-        .loader-dots div {
-            animation-timing-function: cubic-bezier(0, 1, 1, 0);
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #F4F2ED;
+            color: #1A1D1A;
+            overflow-x: hidden;
         }
-        .loader-dots div:nth-child(1) { left: 8px; animation: loader-dots1 0.6s infinite; }
-        .loader-dots div:nth-child(2) { left: 8px; animation: loader-dots2 0.6s infinite; }
-        .loader-dots div:nth-child(3) { left: 32px; animation: loader-dots2 0.6s infinite; }
-        .loader-dots div:nth-child(4) { left: 56px; animation: loader-dots3 0.6s infinite; }
-        @keyframes loader-dots1 { 0% { transform: scale(0); } 100% { transform: scale(1); } }
-        @keyframes loader-dots3 { 0% { transform: scale(1); } 100% { transform: scale(0); } }
-        @keyframes loader-dots2 { 0% { transform: translate(0, 0); } 100% { transform: translate(24px, 0); } }
+
+        .hidden-view { display: none !important; }
+        
+        .page-enter {
+            animation: slideDownFade 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        
+        @keyframes slideDownFade {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes heartbeat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+        .animate-heartbeat { animation: heartbeat 1.5s ease-in-out infinite; }
+        
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #D8E2DC; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #2E5A41; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active{
+            -webkit-box-shadow: 0 0 0 30px #ffffff inset !important;
+            -webkit-text-fill-color: #1A1D1A !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
     </style>
 </head>
-<body class="text-gray-800 h-screen flex flex-col md:flex-row">
+<body class="antialiased selection:bg-primary selection:text-white">
 
-    <!-- ========================================== -->
-    <!-- BAGIAN 1: HALAMAN LOGIN & DAFTAR (AWAL)    -->
-    <!-- ========================================== -->
-    <div id="auth-page" class="flex-1 flex items-center justify-center p-4 min-h-screen w-full bg-green-50">
-        <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md border-t-4 border-green-700">
-            <div class="text-center mb-6">
-                <h1 class="text-2xl font-bold text-green-700">Portal MCU</h1>
-                <p class="text-sm text-gray-500">LPK Yonasindo Intra Pratama</p>
-            </div>
-
-            <!-- Form Login -->
-            <form id="login-form" onsubmit="handleLogin(event)">
-                <div class="mb-4">
-                    <label class="block text-sm font-semibold mb-1">Username</label>
-                    <input type="text" id="login-username" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                </div>
-                <div class="mb-6">
-                    <label class="block text-sm font-semibold mb-1">Password</label>
-                    <input type="password" id="login-password" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                </div>
-                <button type="submit" class="w-full bg-green-600 text-white font-bold py-2 rounded-lg hover:bg-green-700 transition">MASUK</button>
-                <p class="text-center text-sm mt-4">Belum punya akun? <a href="#" onclick="toggleAuth('register')" class="text-green-600 font-bold">Daftar di sini</a></p>
-            </form>
-
-            <!-- Form Daftar (Siswa) -->
-            <form id="register-form" onsubmit="handleRegister(event)" class="hidden-page">
-                <div class="mb-3">
-                    <label class="block text-sm font-semibold mb-1">Nama Lengkap (Sesuai KTP)</label>
-                    <input type="text" id="reg-name" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                </div>
-                <div class="mb-3">
-                    <label class="block text-sm font-semibold mb-1">Nomor Handphone</label>
-                    <input type="number" id="reg-phone" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                </div>
-                <div class="mb-3">
-                    <label class="block text-sm font-semibold mb-1">Email</label>
-                    <input type="email" id="reg-email" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                </div>
-                <div class="mb-3">
-                    <label class="block text-sm font-semibold mb-1">Username</label>
-                    <input type="text" id="reg-username" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                </div>
-                <div class="mb-5">
-                    <label class="block text-sm font-semibold mb-1">Password</label>
-                    <input type="password" id="reg-password" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                </div>
-                <button type="submit" class="w-full bg-green-600 text-white font-bold py-2 rounded-lg hover:bg-green-700 transition">DAFTAR SEKARANG</button>
-                <p class="text-center text-sm mt-4">Sudah punya akun? <a href="#" onclick="toggleAuth('login')" class="text-green-600 font-bold">Masuk di sini</a></p>
-            </form>
-        </div>
+    <div id="loader" class="fixed inset-0 bg-[#F4F2ED]/90 backdrop-blur-xl z-[100] flex-col items-center justify-center fade-in" style="display: none;">
+        <img src="https://raw.githubusercontent.com/medicalyonasindo/divisimcuyonasindo/refs/heads/main/6dbec19efe593667e0d85631dd9629dc.png" alt="Logo Yonasindo" class="w-44 h-44 mb-6 animate-heartbeat drop-shadow-2xl object-contain">
+        <p class="text-primary font-bold tracking-widest text-sm uppercase animate-pulse text-center" id="loader-text">Memproses Data...</p>
     </div>
 
-    <!-- ========================================== -->
-    <!-- BAGIAN 2: DASHBOARD (MUNCUL SETELAH LOGIN) -->
-    <!-- ========================================== -->
-    
-    <!-- Sidebar / Menu Mobile -->
-    <div id="sidebar" class="hidden-page w-full md:w-64 bg-green-800 text-white md:h-screen flex-shrink-0 flex flex-col">
-        <div class="p-4 text-center border-b border-green-700">
-            <h2 class="font-bold text-xl">Divisi Medical</h2>
-            <p class="text-xs text-green-300">LPK Yonasindo</p>
-        </div>
-        
-        <div class="p-4 text-sm bg-green-900">
-            <p>Halo, <b id="display-user-name">User</b></p>
-            <p class="text-xs text-green-300" id="display-user-role">Siswa</p>
-        </div>
-
-        <!-- Menu Untuk Siswa -->
-        <nav id="menu-siswa" class="flex-1 p-2 space-y-1 hidden-page flex flex-col md:flex-col">
-            <button onclick="changePage('siswa-home')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-green-700">🏠 Home (Pengajuan)</button>
-            <button onclick="changePage('siswa-pengajuan')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-green-700">📋 Pengajuan saya</button>
-            <button onclick="changePage('siswa-hasil')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-green-700">🩺 Hasil MCU</button>
-            <button onclick="changePage('siswa-ai')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-green-700 font-bold text-green-200 bg-green-900/50 mt-4 border border-green-600">✨ Asisten AI MCU</button>
-        </nav>
-
-        <!-- Menu Untuk Admin -->
-        <nav id="menu-admin" class="flex-1 p-2 space-y-1 hidden-page flex flex-col md:flex-col">
-            <button onclick="changePage('admin-persetujuan')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-green-700">🔔 Persetujuan MCU</button>
-            <button onclick="changePage('admin-hasil')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-green-700">📝 Input & Hasil MCU</button>
-        </nav>
-
-        <div class="p-4 border-t border-green-700">
-            <button onclick="handleLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg transition">Keluar</button>
-        </div>
-    </div>
-
-    <!-- Konten Utama -->
-    <div id="main-content" class="hidden-page flex-1 h-screen overflow-y-auto bg-gray-50 p-4 md:p-8">
-        
-        <!-- ======================= -->
-        <!-- HALAMAN SISWA           -->
-        <!-- ======================= -->
-        
-        <!-- Halaman Home Siswa (Form Pengajuan) -->
-        <div id="page-siswa-home" class="hidden-page max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <h2 class="text-2xl font-bold text-green-700 mb-6 border-b pb-2">Form Pengajuan MCU</h2>
-            <form onsubmit="submitMCU(event)" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-semibold mb-1">Nama Lengkap (Sesuai KTP)</label>
-                    <input type="text" id="mcu-name" required class="w-full px-3 py-2 border rounded-lg bg-gray-100" readonly>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-1">Nomor Handphone</label>
-                    <input type="number" id="mcu-phone" required class="w-full px-3 py-2 border rounded-lg bg-gray-100" readonly>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-1">Tanggal Lahir</label>
-                    <input type="date" id="mcu-dob" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-1">Kumiai</label>
-                    <input type="text" id="mcu-kumiai" placeholder="Masukkan nama Kumiai" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-1">Pilih Klinik</label>
-                    <select id="mcu-klinik" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 bg-white">
-                        <option value="">-- Pilih Klinik --</option>
-                        <option value="Klinik Galaxy Medical Center">Klinik Galaxy Medical Center</option>
-                        <option value="Klinik Rosela Indah Medical Center">Klinik Rosela Indah Medical Center</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-1">Paket Pemeriksaan</label>
-                    <select id="mcu-paket" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 bg-white">
-                        <option value="">-- Pilih Paket --</option>
-                        <option value="MCU Pra">MCU Pra (Siswa baru masuk ke LPK Yonasindo)</option>
-                        <option value="MCU Full">MCU Full (Siswa lolos mensetsu/matching job)</option>
-                        <option value="MCU Akhir">MCU Akhir (CoE/Penerbangan)</option>
-                    </select>
-                </div>
-                <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 mt-4 shadow-md">AJUKAN MEDICAL CHECKUP</button>
-            </form>
-        </div>
-
-        <!-- Halaman Pengajuan Saya -->
-        <div id="page-siswa-pengajuan" class="hidden-page max-w-3xl mx-auto">
-            <h2 class="text-2xl font-bold text-green-700 mb-6 border-b pb-2">Pengajuan Saya</h2>
-            <div id="container-pengajuan-saya" class="space-y-4">
-                <!-- Konten akan diisi oleh JavaScript -->
+    <!-- Navigasi Utama -->
+    <nav id="navbar" class="hidden-view fixed w-full z-40 top-4 px-4 transition-all duration-500">
+        <div class="max-w-6xl mx-auto bg-white/70 backdrop-blur-2xl border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-full px-6 py-3 flex justify-between items-center">
+            <div class="flex items-center cursor-pointer hover:opacity-80 transition-opacity" onclick="navigate('view-dashboard')">
+                <img src="https://raw.githubusercontent.com/medicalyonasindo/divisimcuyonasindo/refs/heads/main/6dbec19efe593667e0d85631dd9629dc.png" alt="Logo" class="h-9 w-9 mr-3 object-contain">
+                <span class="font-extrabold text-primary text-xl tracking-tight">MCU Yonasindo</span>
             </div>
-        </div>
-
-        <!-- Halaman Hasil MCU Siswa -->
-        <div id="page-siswa-hasil" class="hidden-page max-w-4xl mx-auto">
-            <h2 class="text-2xl font-bold text-green-700 mb-6 border-b pb-2">Database Hasil MCU</h2>
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead class="bg-green-100">
-                        <tr>
-                            <th class="p-3 border-b border-green-200">Tanggal</th>
-                            <th class="p-3 border-b border-green-200">Nama Siswa</th>
-                            <th class="p-3 border-b border-green-200">Klinik & Paket</th>
-                            <th class="p-3 border-b border-green-200 text-center">Hasil MCU</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-siswa-hasil" class="divide-y divide-gray-100">
-                        <!-- Konten akan diisi oleh JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Halaman Asisten AI (GEMINI) -->
-        <div id="page-siswa-ai" class="hidden-page max-w-3xl mx-auto flex flex-col h-[85vh]">
-            <h2 class="text-2xl font-bold text-green-700 mb-2 border-b pb-2 flex items-center gap-2">
-                ✨ Asisten Persiapan MCU
-            </h2>
-            <p class="text-sm text-gray-600 mb-4">Tanyakan apa saja ke AI kami seputar persiapan MCU Anda (puasa, jam tidur, makanan yang dihindari, dll).</p>
-            
-            <div id="chat-history" class="flex-1 overflow-y-auto bg-white p-4 rounded-xl shadow-sm border border-green-200 mb-4 flex flex-col space-y-4">
-                <div class="bg-green-100 text-green-800 p-3 rounded-2xl rounded-tl-sm max-w-[85%] self-start shadow-sm text-sm md:text-base">
-                    Halo! Saya Asisten Medis AI dari LPK Yonasindo. Ada yang bisa saya bantu untuk mempersiapkan Medical Checkup Anda hari ini? 👩‍⚕️
-                </div>
-            </div>
-            
-            <form id="chat-form" onsubmit="handleChatSubmit(event)" class="flex gap-2">
-                <input type="text" id="chat-input" placeholder="Contoh: Apakah saya harus puasa sebelum MCU Full?" class="flex-1 px-4 py-3 border border-green-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm" required autocomplete="off">
-                <button type="submit" id="chat-submit-btn" class="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 font-bold transition shadow-sm flex items-center justify-center min-w-[100px]">
-                    Kirim
+            <div class="hidden md:flex items-center space-x-2 bg-bglight/50 p-1 rounded-full border border-gray-100" id="nav-links-desktop"></div>
+            <div class="hidden md:flex items-center">
+                <button onclick="logout()" class="bg-red-50 hover:bg-red-100 text-red-600 px-5 py-2 rounded-full font-bold text-sm transition-all shadow-sm border border-red-100 flex items-center">
+                    <i class="fa-solid fa-power-off mr-2"></i> Keluar
                 </button>
-            </form>
-        </div>
-
-
-        <!-- ======================= -->
-        <!-- HALAMAN ADMIN           -->
-        <!-- ======================= -->
-        
-        <!-- Halaman Persetujuan Admin -->
-        <div id="page-admin-persetujuan" class="hidden-page max-w-4xl mx-auto">
-            <h2 class="text-2xl font-bold text-green-700 mb-6 border-b pb-2">Menunggu Persetujuan</h2>
-            <div id="container-admin-persetujuan" class="space-y-4">
-                <!-- Konten akan diisi oleh JavaScript -->
+            </div>
+            <div class="md:hidden flex items-center">
+                <button onclick="logout()" class="text-red-500 hover:text-red-700 bg-red-50 p-2.5 rounded-full border border-red-100 flex flex-col items-center justify-center transition-colors">
+                    <i class="fa-solid fa-power-off text-lg"></i>
+                </button>
             </div>
         </div>
+    </nav>
 
-        <!-- Halaman Input Hasil MCU Admin -->
-        <div id="page-admin-hasil" class="hidden-page max-w-5xl mx-auto">
-            <h2 class="text-2xl font-bold text-green-700 mb-6 border-b pb-2">Input Hasil MCU Siswa</h2>
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead class="bg-green-100">
-                        <tr>
-                            <th class="p-3 border-b border-green-200">ID / Tgl</th>
-                            <th class="p-3 border-b border-green-200">Siswa & Kumiai</th>
-                            <th class="p-3 border-b border-green-200">Klinik & Paket</th>
-                            <th class="p-3 border-b border-green-200 text-center">Update Hasil</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-admin-hasil" class="divide-y divide-gray-100">
-                        <!-- Konten akan diisi oleh JavaScript -->
-                    </tbody>
-                </table>
+    <nav id="bottom-nav" class="hidden-view md:hidden fixed bottom-6 left-4 right-4 z-40 transition-all duration-500 pb-safe">
+        <div class="bg-white/80 backdrop-blur-2xl shadow-[0_10px_40px_rgb(0,0,0,0.08)] border border-white/60 rounded-full h-16 flex justify-around items-center px-3" id="bottom-nav-links"></div>
+    </nav>
+
+    <main id="app-container" class="min-h-screen pt-28 pb-32 md:pb-16 flex flex-col items-center w-full">
+
+        <!-- ==================== AUTH VIEW ==================== -->
+        <section id="view-auth" class="w-full min-h-screen hidden-view page-enter relative overflow-hidden flex items-center !pt-0 !pb-0 -mt-28">
+            <div class="absolute top-0 right-0 w-1/2 h-full bg-accent/30 rounded-l-full blur-3xl opacity-50 pointer-events-none transform translate-x-1/3"></div>
+            <div class="absolute bottom-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl opacity-50 pointer-events-none transform -translate-x-1/2 translate-y-1/2"></div>
+
+            <div class="w-full max-w-7xl mx-auto px-6 py-12 flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-12 lg:gap-20 relative z-10">
+                <div class="w-full lg:w-1/2 flex flex-col items-center lg:items-start text-center lg:text-left animate-float">
+                    <div class="relative group mb-8">
+                        <div class="absolute inset-0 bg-white rounded-full blur-2xl opacity-60 group-hover:opacity-100 transition duration-700 pointer-events-none"></div>
+                        <img src="https://raw.githubusercontent.com/medicalyonasindo/divisimcuyonasindo/refs/heads/main/6dbec19efe593667e0d85631dd9629dc.png" alt="Logo Yonasindo" class="relative h-64 w-64 md:h-80 md:w-80 lg:h-96 lg:w-96 object-contain drop-shadow-[0_20px_40px_rgba(28,59,43,0.15)] transition-transform duration-700 hover:scale-105">
+                    </div>
+                    
+                    <h1 class="text-5xl md:text-6xl lg:text-7xl font-extrabold text-primary tracking-tighter mb-5 leading-[1.1]">
+                        Medical <br/>
+                        <span class="text-secondary">Terpadu.</span>
+                    </h1>
+                    <p class="text-gray-600 text-lg md:text-xl font-medium max-w-md leading-relaxed">
+                        Manajemen kesehatan yang presisi, aman, dan dirancang elegan untuk menunjang mobilitas LPK Yonasindo.
+                    </p>
+                </div>
+
+                <div class="w-full lg:w-[480px]">
+                    <div class="bg-white border border-gray-100 p-8 md:p-10 rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.03)] relative overflow-hidden">
+                        
+                        <div id="form-login">
+                            <div class="mb-8 text-center lg:text-left">
+                                <h3 class="text-3xl font-extrabold text-primary mb-2 tracking-tight">Selamat Datang</h3>
+                                <p class="text-gray-500 text-sm font-medium">Masuk untuk melanjutkan ke portal.</p>
+                            </div>
+
+                            <div class="space-y-5">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Username</label>
+                                    <input type="text" id="login-username" class="w-full px-5 py-4 bg-bglight border border-gray-200 rounded-2xl focus:ring-2 focus:ring-secondary focus:border-transparent focus:bg-white outline-none transition-all duration-300 text-primary font-medium placeholder-gray-400 text-sm" placeholder="Ketik username Anda">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Password</label>
+                                    <div class="relative">
+                                        <input type="password" id="login-password" class="w-full px-5 py-4 bg-bglight border border-gray-200 rounded-2xl focus:ring-2 focus:ring-secondary focus:border-transparent focus:bg-white outline-none transition-all duration-300 text-primary font-medium placeholder-gray-400 text-sm pr-12" placeholder="••••••••">
+                                        <button type="button" onclick="togglePassword('login-password', 'login-eye-icon')" class="absolute inset-y-0 right-0 pr-5 flex items-center text-gray-400 hover:text-primary transition-colors focus:outline-none">
+                                            <i id="login-eye-icon" class="fa-solid fa-eye text-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between mt-6 mb-8">
+                                <div class="flex items-center group cursor-pointer">
+                                    <input type="checkbox" id="remember-me" class="h-5 w-5 bg-bglight border border-gray-300 rounded-md cursor-pointer checked:bg-primary checked:border-primary focus:ring-0 focus:ring-offset-0 transition-colors">
+                                    <label for="remember-me" class="ml-3 block text-sm font-medium text-gray-500 group-hover:text-primary transition-colors cursor-pointer">Ingat sesi saya</label>
+                                </div>
+                            </div>
+
+                            <button onclick="handleLogin()" class="w-full bg-primary hover:bg-secondary text-white font-bold py-4 px-4 rounded-2xl transition-all duration-300 shadow-[0_10px_20px_rgba(28,59,43,0.15)] hover:shadow-[0_15px_30px_rgba(28,59,43,0.25)] transform hover:-translate-y-1">
+                                Masuk Portal <i class="fa-solid fa-arrow-right ml-2 opacity-80"></i>
+                            </button>
+                            
+                            <div class="mt-8 flex items-center justify-center gap-3">
+                                <div class="h-px bg-gray-200 flex-1"></div>
+                                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Belum Punya Akun?</span>
+                                <div class="h-px bg-gray-200 flex-1"></div>
+                            </div>
+                            
+                            <button onclick="toggleAuth('register')" class="w-full mt-6 bg-white border-2 border-gray-200 hover:border-secondary hover:text-secondary text-gray-600 font-extrabold py-4 px-4 rounded-2xl transition-all duration-300 shadow-sm transform hover:-translate-y-1">
+                                Buat Akun Baru
+                            </button>
+                        </div>
+
+                        <div id="form-register" class="hidden">
+                            <div class="mb-8 text-center lg:text-left">
+                                <h3 class="text-2xl font-extrabold text-primary mb-2 tracking-tight">Pendaftaran Peserta</h3>
+                                <p class="text-gray-500 text-sm font-medium">Lengkapi data Anda dengan benar.</p>
+                            </div>
+                            
+                            <div class="space-y-4 max-h-[50vh] overflow-y-auto pr-3 custom-scrollbar pb-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Nama Lengkap</label>
+                                    <input type="text" id="reg-nama" oninput="formatNamaEYD(this)" class="w-full px-4 py-3.5 bg-bglight border border-gray-200 rounded-xl focus:ring-2 focus:ring-secondary focus:bg-white outline-none transition-all duration-300 text-primary font-medium placeholder-gray-400 text-sm" placeholder="Sesuai ejaan KTP">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Email Pribadi</label>
+                                    <input type="email" id="reg-email" class="w-full px-4 py-3.5 bg-bglight border border-gray-200 rounded-xl focus:ring-2 focus:ring-secondary focus:bg-white outline-none transition-all duration-300 text-primary font-medium placeholder-gray-400 text-sm" placeholder="alamat@email.com">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Nomor Telepon (Aktif)</label>
+                                    <input type="text" id="reg-hp" oninput="validateHP(this)" class="w-full px-4 py-3.5 bg-bglight border border-gray-200 rounded-xl focus:ring-2 focus:ring-secondary focus:bg-white outline-none transition-all duration-300 text-primary font-medium placeholder-gray-400 text-sm" placeholder="08xxxxxxxxxx">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Tujuan Penempatan</label>
+                                    <div class="relative">
+                                        <select id="reg-negara" class="w-full px-4 py-3.5 bg-bglight border border-gray-200 rounded-xl focus:ring-2 focus:ring-secondary focus:bg-white outline-none transition-all duration-300 text-primary font-bold appearance-none text-sm cursor-pointer">
+                                            <option value="jepang">🇯🇵 Jepang</option>
+                                            <option value="taiwan">🇹🇼 Taiwan</option>
+                                        </select>
+                                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Username Baru</label>
+                                    <input type="text" id="reg-username" oninput="validateUsername(this)" placeholder="Tanpa spasi" class="w-full px-4 py-3.5 bg-bglight border border-gray-200 rounded-xl focus:ring-2 focus:ring-secondary focus:bg-white outline-none transition-all duration-300 text-primary font-medium placeholder-gray-400 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Kata Sandi (Password)</label>
+                                    <div class="relative">
+                                        <input type="password" id="reg-password" oninput="validatePassword(this)" placeholder="Kombinasi huruf & angka" class="w-full px-4 py-3.5 bg-bglight border border-gray-200 rounded-xl focus:ring-2 focus:ring-secondary focus:bg-white outline-none transition-all duration-300 text-primary font-medium placeholder-gray-400 text-sm pr-12">
+                                        <button type="button" onclick="togglePassword('reg-password', 'reg-eye-icon')" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-primary transition-colors focus:outline-none">
+                                            <i id="reg-eye-icon" class="fa-solid fa-eye text-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button onclick="handleRegister()" class="w-full mt-8 bg-secondary hover:bg-primary text-white font-bold py-4 px-4 rounded-2xl transition-all duration-300 shadow-[0_10px_20px_rgba(46,90,65,0.15)] hover:shadow-[0_15px_30px_rgba(46,90,65,0.25)] transform hover:-translate-y-1">
+                                Daftarkan Akun
+                            </button>
+                            
+                            <div class="mt-8 flex items-center justify-center gap-3">
+                                <div class="h-px bg-gray-200 flex-1"></div>
+                                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Sudah Terdaftar?</span>
+                                <div class="h-px bg-gray-200 flex-1"></div>
+                            </div>
+
+                            <button onclick="toggleAuth('login')" class="w-full mt-6 bg-white border-2 border-gray-200 hover:border-secondary hover:text-secondary text-gray-600 font-extrabold py-4 px-4 rounded-2xl transition-all duration-300 shadow-sm transform hover:-translate-y-1">
+                                Kembali untuk Masuk
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
-        </div>
+        </section>
 
+        <!-- ==================== DASHBOARD VIEW ==================== -->
+        <section id="view-dashboard" class="w-full max-w-5xl px-4 hidden-view relative z-10">
+            <div class="bg-primary text-white p-8 md:p-10 rounded-[2.5rem] shadow-xl mb-8 relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-90 z-0"></div>
+                <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-3xl z-0"></div>
+                
+                <div class="relative z-10">
+                    <span class="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest mb-4">Internal System</span>
+                    <h1 class="text-3xl md:text-4xl font-extrabold mb-2 tracking-tight" id="dash-title">PORTAL MEDICAL TERPADU</h1>
+                    <p class="text-accent italic text-lg mb-1 font-medium">"Sanitas et Sapiens"</p>
+                    <p class="text-sm text-white/70 mb-6 font-light">(Kesehatan dan Kebijaksanaan)</p>
+                    
+                    <div id="dash-admin-greet" class="hidden p-4 bg-white/10 rounded-2xl border border-white/20 backdrop-blur-md mt-2 inline-block">
+                        <!-- Teks salam akan diganti secara dinamis berdasarkan role -->
+                    </div>
+                    
+                    <div id="dash-student-alert" onclick="navigate('view-pengajuan')" class="hidden mt-6 p-6 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 cursor-pointer rounded-2xl shadow-[0_15px_30px_rgba(245,158,11,0.4)] text-center transform transition-all duration-300 hover:scale-[1.03] border border-yellow-300">
+                        <div class="flex items-center justify-between gap-3 md:gap-5">
+                            <div class="bg-white/40 p-4 rounded-full text-yellow-900 shadow-inner flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-notes-medical text-3xl md:text-4xl animate-pulse"></i>
+                            </div>
+                            <div class="text-left flex-1">
+                                <span class="font-black text-xl md:text-2xl text-yellow-900 block leading-tight tracking-tight uppercase drop-shadow-sm">AJUKAN MEDICAL</span>
+                                <span class="font-bold text-sm md:text-base text-yellow-800 block mt-1">KLIK DI SINI untuk mengisi form!</span>
+                            </div>
+                            <div class="bg-yellow-900 text-yellow-400 w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-lg shrink-0">
+                                <i class="fa-solid fa-arrow-right text-lg md:text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                <div class="md:col-span-2 space-y-6 md:space-y-8">
+                    
+                    <!-- HUBUNGI ADMIN (WHATSAPP) -->
+                    <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-green-100 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-bl-full transition-transform duration-700 group-hover:scale-110"></div>
+                        <h2 class="text-2xl font-extrabold text-green-800 mb-3 tracking-tight relative z-10"><i class="fa-brands fa-whatsapp text-white bg-green-500 rounded-full p-2.5 text-lg mr-2 shadow-md"></i> Pusat Bantuan</h2>
+                        <p class="text-sm text-green-700 mb-6 leading-relaxed relative z-10 font-medium">Untuk informasi atau kendala dalam pelaksanaan Medical Chek Up, harap hubungi <span class="font-bold">+62 819-1184-6045</span> atau klik disini.</p>
+                        
+                        <div class="relative z-10">
+                            <a href="https://wa.me/6281911846045" target="_blank" class="inline-flex items-center justify-center bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-2xl shadow-lg shadow-green-500/30 text-sm font-extrabold transition-all transform hover:-translate-y-1 w-full sm:w-auto">
+                                <i class="fa-brands fa-whatsapp text-xl mr-2"></i> Hubungi Admin
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Informasi Penyakit -->
+                    <div class="bg-white p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50">
+                        <h2 class="text-xl font-bold text-primary mb-5 tracking-tight"><i class="fa-solid fa-virus-slash text-red-400 bg-red-50 rounded-full p-2 text-sm mr-2"></i> Kondisi Klinis Dihindari</h2>
+                        <div id="info-penyakit" class="text-sm text-gray-600 space-y-4"></div>
+                    </div>
+                    
+                    <div class="bg-primary text-white p-8 rounded-[2rem] shadow-xl relative overflow-hidden">
+                        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+                        <h2 class="text-xl font-bold mb-6 tracking-tight relative z-10"><i class="fa-solid fa-scale-balanced bg-white/20 rounded-full p-2 text-sm mr-2"></i> Kalkulator BMI Standar</h2>
+                        
+                        <div class="flex flex-col sm:flex-row gap-5 mb-6 relative z-10">
+                            <div class="w-full bg-white/10 p-4 rounded-2xl border border-white/20 backdrop-blur-sm">
+                                <label class="block text-[10px] font-bold text-accent uppercase tracking-widest mb-2">Tinggi (CM)</label>
+                                <input type="number" id="bmi-tinggi" class="w-full p-3 bg-white/10 border border-white/20 rounded-xl focus:ring-2 focus:ring-accent text-white font-bold text-lg outline-none placeholder-white/30" placeholder="165">
+                            </div>
+                            <div class="w-full bg-white/10 p-4 rounded-2xl border border-white/20 backdrop-blur-sm">
+                                <label class="block text-[10px] font-bold text-accent uppercase tracking-widest mb-2">Berat (KG)</label>
+                                <input type="number" id="bmi-berat" class="w-full p-3 bg-white/10 border border-white/20 rounded-xl focus:ring-2 focus:ring-accent text-white font-bold text-lg outline-none placeholder-white/30" placeholder="60">
+                            </div>
+                        </div>
+                        <button onclick="hitungBMI()" class="w-full bg-white text-primary hover:bg-bglight px-6 py-4 rounded-xl text-sm font-extrabold transition-all shadow-lg transform hover:-translate-y-1 relative z-10">Hitung Indeks Massa Tubuh</button>
+                        <div id="bmi-result" class="mt-6 hidden bg-white text-gray-800 p-6 rounded-2xl border-none shadow-inner relative z-10"></div>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50">
+                        <h2 class="text-xl font-bold text-primary mb-3 tracking-tight"><i class="fa-solid fa-droplet text-blue-400 bg-blue-50 rounded-full p-2 text-sm mr-2"></i> Indikator Warna Urin</h2>
+                        <p class="text-sm text-gray-500 mb-6 font-medium leading-relaxed">Cek tingkat hidrasi dan kondisi ginjal Anda secara mandiri. Pilih warna yang sesuai dengan kondisi Anda hari ini:</p>
+                        
+                        <div class="flex flex-wrap gap-4 mb-6 justify-center bg-bglight p-5 rounded-3xl border border-gray-200">
+                            <button onclick="cekUrin('bening')" class="w-12 h-12 rounded-full border-4 border-white shadow-md bg-[#fefce8] hover:scale-110 transition-transform" title="Bening"></button>
+                            <button onclick="cekUrin('kuning_normal')" class="w-12 h-12 rounded-full border-4 border-white shadow-md bg-[#fde047] hover:scale-110 transition-transform" title="Kuning Normal"></button>
+                            <button onclick="cekUrin('kuning_pucat')" class="w-12 h-12 rounded-full border-4 border-white shadow-md bg-[#facc15] hover:scale-110 transition-transform" title="Kuning Pucat"></button>
+                            <button onclick="cekUrin('kuning_tua')" class="w-12 h-12 rounded-full border-4 border-white shadow-md bg-[#ca8a04] hover:scale-110 transition-transform" title="Kuning Tua"></button>
+                            <button onclick="cekUrin('kuning_kecoklatan')" class="w-12 h-12 rounded-full border-4 border-white shadow-md bg-[#b45309] hover:scale-110 transition-transform" title="Kuning Kecoklatan"></button>
+                            <button onclick="cekUrin('orange')" class="w-12 h-12 rounded-full border-4 border-white shadow-md bg-[#ea580c] hover:scale-110 transition-transform" title="Oranye"></button>
+                            <button onclick="cekUrin('merah')" class="w-12 h-12 rounded-full border-4 border-white shadow-md bg-[#dc2626] hover:scale-110 transition-transform" title="Merah"></button>
+                            <button onclick="cekUrin('coklat')" class="w-12 h-12 rounded-full border-4 border-white shadow-md bg-[#451a03] hover:scale-110 transition-transform" title="Cokelat"></button>
+                        </div>
+                        <div id="urin-result" class="hidden p-5 rounded-2xl border border-gray-100 bg-white text-sm shadow-sm transition-all"></div>
+                    </div>
+                </div>
+
+                <div class="space-y-6 md:space-y-8">
+                    <div class="bg-white p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50">
+                        <h2 class="text-lg font-bold text-primary mb-6 tracking-tight"><i class="fa-solid fa-chart-pie text-purple-500 bg-purple-50 rounded-full p-2 text-sm mr-2"></i> Rekapitulasi Data</h2>
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="bg-bglight p-4 rounded-2xl border border-gray-100 text-center">
+                                <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Total Req</p>
+                                <p class="text-3xl font-black text-primary" id="stat-total-req">0</p>
+                            </div>
+                            <div class="bg-bglight p-4 rounded-2xl border border-gray-100 text-center">
+                                <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Selesai</p>
+                                <p class="text-3xl font-black text-blue-600" id="stat-total-mcu">0</p>
+                            </div>
+                        </div>
+                        <div class="space-y-3 text-sm font-medium">
+                            <div class="flex justify-between items-center p-2 bg-gray-50 rounded-lg"><span class="text-gray-600 flex items-center"><i class="fa-solid fa-earth-asia mr-2 text-gray-400"></i> Jepang</span><span class="font-bold text-gray-800 bg-white px-2 py-0.5 rounded border shadow-sm" id="stat-jp">0</span></div>
+                            <div class="flex justify-between items-center p-2 bg-gray-50 rounded-lg"><span class="text-gray-600 flex items-center"><i class="fa-solid fa-earth-asia mr-2 text-gray-400"></i> Taiwan</span><span class="font-bold text-gray-800 bg-white px-2 py-0.5 rounded border shadow-sm" id="stat-tw">0</span></div>
+                            <div class="h-px bg-gray-100 my-4"></div>
+                            <div class="flex justify-between items-center p-2"><span class="text-green-700 font-bold flex items-center"><span class="w-2 h-2 rounded-full bg-green-500 mr-2"></span> FIT</span><span class="font-black text-green-700" id="stat-fit">0</span></div>
+                            <div class="flex justify-between items-center p-2"><span class="text-yellow-600 font-bold flex items-center"><span class="w-2 h-2 rounded-full bg-yellow-400 mr-2"></span> FWN</span><span class="font-black text-yellow-600" id="stat-fwn">0</span></div>
+                            <div class="flex justify-between items-center p-2"><span class="text-red-600 font-bold flex items-center"><span class="w-2 h-2 rounded-full bg-red-500 mr-2"></span> UNFIT</span><span class="font-black text-red-600" id="stat-unfit">0</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Panel Papan Informasi / Berita -->
+                    <div id="widget-news" class="bg-white p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 hidden">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-lg font-bold text-primary tracking-tight"><i class="fa-regular fa-newspaper text-orange-400 bg-orange-50 rounded-full p-2 text-sm mr-2"></i> Papan Informasi</h2>
+                            <button id="btn-add-news" onclick="openModal('modal-add-news')" class="hidden text-xs bg-primary text-white px-3 py-1.5 rounded-lg font-bold hover:bg-secondary transition shadow-sm"><i class="fa-solid fa-plus mr-1"></i> Baru</button>
+                        </div>
+                        <div id="news-container" class="space-y-4"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== PENGAJUAN MEDICAL VIEW ==================== -->
+        <section id="view-pengajuan" class="w-full max-w-4xl px-4 hidden-view relative z-10">
+            <div class="bg-white rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.04)] overflow-hidden border border-gray-50">
+                <div class="flex bg-bglight p-2 m-4 rounded-2xl">
+                    <button class="w-1/2 py-3.5 font-bold text-sm rounded-xl text-white bg-primary shadow-md tab-btn transition-all duration-300" onclick="switchTab('tab-form-pengajuan', this)">📝 Formulir Pengajuan</button>
+                    <button class="w-1/2 py-3.5 font-bold text-sm rounded-xl text-gray-500 hover:text-primary hover:bg-white/50 tab-btn transition-all duration-300" onclick="switchTab('tab-riwayat-pengajuan', this)">📁 Riwayat Saya</button>
+                </div>
+                
+                <div class="p-8 md:p-10">
+                    <div id="tab-form-pengajuan">
+                        <h2 class="text-3xl font-extrabold text-primary mb-8 tracking-tight" id="form-pengajuan-title">Formulir Pengajuan Medical</h2>
+                        <form id="form-mcu" onsubmit="submitPengajuan(event)">
+                            <input type="hidden" id="edit-pengajuan-id" value="">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Nama Lengkap Sesuai KTP</label>
+                                    <input type="text" id="pengajuan-nama" required class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-600 font-bold focus:outline-none cursor-not-allowed" readonly>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Nomor Telepon</label>
+                                    <input type="text" id="pengajuan-hp" required class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-600 font-bold focus:outline-none cursor-not-allowed" readonly>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Tanggal Kelahiran</label>
+                                    <input type="date" id="pengajuan-tgl-lahir" required class="w-full p-4 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-medium text-gray-800 transition-all">
+                                </div>
+                                
+                                <div id="pengajuan-jepang-fields" class="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 hidden">
+                                    <div class="col-span-1 md:col-span-2">
+                                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Alamat Lengkap KTP</label>
+                                        <textarea id="pengajuan-alamat" rows="2" class="w-full p-4 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-medium text-gray-800 transition-all"></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Nama Kumiai</label>
+                                        <input type="text" id="pengajuan-kumiai" oninput="validateKumiai(this)" placeholder="Contoh: Fukutomo" class="w-full p-4 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-medium text-gray-800 transition-all">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Jenis Pemeriksaan</label>
+                                        <div class="relative">
+                                            <select id="pengajuan-jenis" class="w-full p-4 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-bold text-primary appearance-none cursor-pointer transition-all">
+                                                <option value="MCU PRA">MCU PRA (Siswa Baru)</option>
+                                                <option value="MCU FULL">MCU FULL (Lolos Mensetsu/Matching)</option>
+                                                <option value="MCU AKHIR">MCU AKHIR (COE Terbit)</option>
+                                                <option value="IGRA">IGRA (Khusus Supa ASE)</option>
+                                                <option value="VAKSIN CAMPAK">VAKSIN CAMPAK (Fukutomo)</option>
+                                                <option value="LAIN-LAIN">LAIN-LAIN (Periksa kembali)</option>
+                                            </select>
+                                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                                                <i class="fa-solid fa-chevron-down text-xs"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-10 flex flex-col sm:flex-row justify-end gap-4 border-t border-gray-100 pt-8">
+                                <button type="button" id="btn-cancel-edit" onclick="cancelEdit()" class="hidden bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-4 px-8 rounded-xl transition-all">Batal Edit</button>
+                                <button type="submit" id="btn-submit-pengajuan" class="bg-primary hover:bg-secondary text-white font-extrabold py-4 px-10 rounded-xl shadow-[0_10px_20px_rgba(28,59,43,0.15)] transform hover:-translate-y-1 transition-all">Submit Pengajuan Baru</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div id="tab-riwayat-pengajuan" class="hidden">
+                        <div id="riwayat-empty" class="text-center py-16 hidden bg-gray-50 rounded-2xl border border-gray-100">
+                            <i class="fa-regular fa-folder-open text-4xl text-gray-300 mb-3"></i>
+                            <h3 class="text-lg font-bold text-gray-500">Belum ada riwayat pengajuan.</h3>
+                        </div>
+                        <div id="riwayat-content" class="space-y-5"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== KELOLA PENGAJUAN ADMIN DENGAN PAGINATION ==================== -->
+        <section id="view-kelola-pengajuan" class="w-full max-w-6xl px-4 hidden-view relative z-10">
+            <div class="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.04)] border border-gray-50">
+                <h2 class="text-3xl font-extrabold text-primary mb-8 tracking-tight"><i class="fa-solid fa-list-check mr-2 opacity-50"></i> Kelola Pengajuan Masuk</h2>
+                <div id="kelola-pengajuan-container" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+                <!-- Pagination untuk Kelola Pengajuan -->
+                <div id="pagination-kelola-container" class="mt-10 flex justify-center items-center gap-2 flex-wrap pb-2"></div>
+            </div>
+        </section>
+
+        <!-- ==================== HASIL MEDICAL VIEW ==================== -->
+        <section id="view-hasil" class="w-full max-w-6xl px-4 hidden-view relative z-10">
+            <div class="bg-white rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.04)] overflow-hidden border border-gray-50">
+                <div class="flex bg-bglight p-2 m-4 rounded-2xl" id="hasil-tabs-container">
+                    <button class="w-1/2 py-3.5 font-bold text-sm rounded-xl text-white bg-primary shadow-md tab-hasil-btn transition-all duration-300" onclick="switchTabHasil('tab-hasil-saya', this)">Milik Saya</button>
+                    <button class="w-1/2 py-3.5 font-bold text-sm rounded-xl text-gray-500 hover:text-primary hover:bg-white/50 tab-hasil-btn transition-all duration-300" onclick="switchTabHasil('tab-data-medical', this)">Database Global</button>
+                </div>
+                
+                <div class="p-8 md:p-10 pb-20"> 
+                    <div id="tab-hasil-saya">
+                        <h2 class="text-2xl font-extrabold text-primary mb-6 tracking-tight">Dokumen Hasil Medical</h2>
+                        <div id="hasil-saya-content" class="space-y-5"></div>
+                    </div>
+                    
+                    <div id="tab-data-medical" class="hidden">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-5 bg-bglight p-5 rounded-2xl border border-gray-100">
+                            <h2 class="text-xl font-extrabold text-primary tracking-tight" id="title-data-medical"><i class="fa-solid fa-database mr-2 opacity-50"></i> Database Global</h2>
+                            <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                                <div class="relative w-full md:w-64 lg:w-80">
+                                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    <input type="text" id="search-mcu" oninput="handleSearch()" placeholder="Cari Nama, Kumiai, Paket, atau Hasil..." class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm">
+                                </div>
+                                <input type="date" id="search-date" onchange="handleSearch()" class="px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary outline-none shadow-sm cursor-pointer">
+                            </div>
+                        </div>
+                        
+                        <div id="data-medical-container" class="grid grid-cols-1 md:grid-cols-2 gap-5 relative"></div>
+                        
+                        <!-- WADAH UNTUK TOMBOL HALAMAN (PAGINATION) -->
+                        <div id="pagination-container" class="mt-10 flex justify-center items-center gap-2 flex-wrap pb-6"></div>
+                        
+                    </div>
+                </div>
+            </div>
+            
+            <div id="bulk-action-bar" class="fixed bottom-24 md:bottom-10 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-xl px-6 py-4 rounded-full shadow-[0_20px_60px_rgba(0,0,0,0.15)] border border-gray-200 z-50 flex items-center gap-4 transition-all duration-300 translate-y-32 opacity-0">
+                <div class="flex items-center justify-center bg-green-100 text-green-700 w-8 h-8 rounded-full font-black text-sm" id="bulk-count">0</div>
+                <span class="font-bold text-gray-700 text-sm hidden md:inline">Siswa Dipilih</span>
+                <div class="w-px h-6 bg-gray-200 mx-1"></div>
+                <button onclick="editBulkStatus()" class="bg-primary text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-secondary transition-all shadow-md hover:-translate-y-0.5 whitespace-nowrap"><i class="fa-solid fa-pen-to-square mr-1"></i> Ubah Status Massal</button>
+                <button onclick="clearBulkSelection()" class="bg-gray-100 text-gray-500 w-10 h-10 rounded-full font-bold hover:bg-red-50 hover:text-red-500 transition-colors flex items-center justify-center ml-1"><i class="fa-solid fa-times text-lg"></i></button>
+            </div>
+        </section>
+
+        <!-- ==================== CALENDAR VIEW ==================== -->
+        <section id="view-calendar" class="w-full max-w-5xl px-4 hidden-view relative z-10">
+            <div class="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.04)] border border-gray-50">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-5 border-b border-gray-100 pb-6">
+                    <h2 class="text-3xl font-extrabold text-primary tracking-tight"><i class="fa-solid fa-calendar-day mr-2 opacity-50"></i> Estimasi Jadwal MCU</h2>
+                    
+                    <div class="flex items-center gap-2 bg-bglight p-1.5 rounded-2xl border border-gray-200">
+                        <button onclick="changeMonth(-1)" class="bg-white hover:bg-gray-50 text-primary w-10 h-10 rounded-xl shadow-sm transition-all flex items-center justify-center border border-gray-100"><i class="fa-solid fa-chevron-left"></i></button>
+                        <h3 id="cal-month-year" class="text-sm font-black text-primary w-32 md:w-40 text-center tracking-widest uppercase">Bulan Tahun</h3>
+                        <button onclick="changeMonth(1)" class="bg-white hover:bg-gray-50 text-primary w-10 h-10 rounded-xl shadow-sm transition-all flex items-center justify-center border border-gray-100"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-7 gap-2 md:gap-3 mb-3 text-center text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest">
+                    <div class="text-red-400">Min</div><div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div class="text-blue-400">Sab</div>
+                </div>
+                <div id="calendar-grid" class="grid grid-cols-7 gap-2 md:gap-3"></div>
+            </div>
+        </section>
+
+        <footer id="global-footer" class="w-full py-8 mt-auto border-t border-gray-200/60 bg-transparent transition-colors duration-500 z-10 relative">
+            <div class="max-w-7xl mx-auto px-6 md:px-8 flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4 text-center md:text-left">
+                <p id="footer-text-1" class="text-[11px] md:text-xs font-medium text-gray-400 tracking-wide">&copy; 2026 LPK Yonasindo Intra Pratama. All Right Reserved.</p>
+                <p id="footer-text-2" class="text-[11px] md:text-xs font-medium text-gray-400 tracking-wide">Website Dirancang Oleh <span id="footer-author" class="font-bold text-gray-500">Alexander Gorga</span></p>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- MODALS -->
+    <div id="modal-alert" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center fade-in">
+        <div class="bg-white rounded-[2rem] shadow-2xl p-8 max-w-sm w-full mx-4 flex flex-col max-h-[85vh] border border-white/20">
+            <div class="w-16 h-1 bg-gray-200 rounded-full mx-auto mb-6"></div>
+            <h3 class="text-2xl font-extrabold mb-3 text-center shrink-0 text-primary tracking-tight" id="alert-title"></h3>
+            <div class="text-gray-600 text-sm mb-8 overflow-y-auto text-center font-medium leading-relaxed flex-grow custom-scrollbar whitespace-pre-wrap" id="alert-message"></div>
+            <button onclick="closeModal('modal-alert')" class="bg-primary hover:bg-secondary text-white px-6 py-4 rounded-xl font-bold w-full shrink-0 transition-all shadow-lg hover:-translate-y-1">Tutup Saja</button>
+        </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- LOGIKA JAVASCRIPT & DATABASE SEMENTARA     -->
-    <!-- ========================================== -->
+    <div id="modal-confirm" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center fade-in">
+        <div class="bg-white rounded-[2rem] shadow-2xl p-8 max-w-sm w-full mx-4 text-center border border-white/20">
+            <div class="w-16 h-1 bg-gray-200 rounded-full mx-auto mb-6"></div>
+            <h3 class="text-2xl font-extrabold mb-3 text-primary tracking-tight">Konfirmasi Aksi</h3>
+            <p class="text-gray-600 text-sm font-medium mb-8 leading-relaxed" id="confirm-message"></p>
+            <div class="flex gap-4">
+                <button onclick="closeModal('modal-confirm')" class="bg-bglight text-gray-600 border border-gray-200 hover:bg-gray-100 px-4 py-3.5 rounded-xl font-bold w-1/2 transition-colors">Batal</button>
+                <button id="btn-confirm-yes" class="bg-red-500 hover:bg-red-600 text-white px-4 py-3.5 rounded-xl font-bold w-1/2 transition-colors shadow-lg">Ya, Lanjutkan</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-syarat-jepang" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center fade-in">
+        <div class="bg-white rounded-[2rem] shadow-2xl p-8 max-w-md w-full mx-4 border border-white/20">
+            <h3 class="text-2xl font-extrabold text-primary mb-4 border-b border-gray-100 pb-4 tracking-tight"><i class="fa-solid fa-clipboard-list mr-2 text-accent"></i> Syarat MCU Jepang</h3>
+            <div class="text-sm font-medium text-gray-600 space-y-3 mb-8 bg-bglight p-5 rounded-2xl border border-gray-100 leading-relaxed">
+                <p class="flex items-start"><span class="bg-white text-primary rounded-full w-5 h-5 flex items-center justify-center mr-2 font-bold shadow-sm shrink-0 border border-gray-100">1</span> Siswa CoE wajib minta surat ijin dari sensei kelas.</p>
+                <p class="flex items-start"><span class="bg-white text-primary rounded-full w-5 h-5 flex items-center justify-center mr-2 font-bold shadow-sm shrink-0 border border-gray-100">2</span> Menunggu jemputan pihak klinik di pos satpam depan.</p>
+                <p class="flex items-start"><span class="bg-white text-primary rounded-full w-5 h-5 flex items-center justify-center mr-2 font-bold shadow-sm shrink-0 border border-gray-100">3</span> Waktu ijin keluar kelas: Pukul 08:45 atau 10:30 pagi.</p>
+                <p class="flex items-start"><span class="bg-white text-primary rounded-full w-5 h-5 flex items-center justify-center mr-2 font-bold shadow-sm shrink-0 border border-gray-100">4</span> Segera hubungi 0819-1184-6045 jika mengalami kendala.</p>
+            </div>
+            <div class="flex items-center mb-8 p-3 border border-blue-100 bg-blue-50 rounded-xl cursor-pointer hover:bg-blue-100 transition-colors" onclick="document.getElementById('chk-paham-jp').click()">
+                <input type="checkbox" id="chk-paham-jp" class="w-5 h-5 bg-white border-gray-300 rounded cursor-pointer checked:bg-primary checked:border-primary focus:ring-0 focus:ring-offset-0">
+                <label class="ml-3 text-sm font-bold text-blue-900 cursor-pointer select-none">Saya membaca & memahami aturan.</label>
+            </div>
+            <div class="flex gap-4 justify-end">
+                <button onclick="closeModal('modal-syarat-jepang')" class="bg-bglight border border-gray-200 text-gray-600 hover:bg-gray-100 px-6 py-3.5 rounded-xl text-sm font-bold transition-colors">Tutup</button>
+                <button onclick="processSubmitJP()" class="bg-primary hover:bg-secondary text-white px-8 py-3.5 rounded-xl text-sm font-bold shadow-lg transition-transform transform hover:-translate-y-1" id="btn-kirim-jp">Kirim Pengajuan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL TAMBAH BERITA -->
+    <div id="modal-add-news" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center fade-in">
+        <div class="bg-white rounded-[2rem] shadow-2xl p-8 max-w-lg w-full mx-4 border border-white/20">
+            <h3 class="text-2xl font-extrabold text-primary mb-6 border-b border-gray-100 pb-4 tracking-tight" id="news-modal-title">Publikasi Berita Baru</h3>
+            
+            <div class="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-2xl border border-blue-100 shadow-sm relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 w-16 h-16 bg-blue-400 opacity-10 rounded-full blur-xl"></div>
+                <label class="block text-[10px] font-bold text-blue-800 uppercase tracking-widest mb-2"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Bantuan AI Penulis ✨</label>
+                <div class="flex gap-3">
+                    <input type="text" id="news-ai-prompt" placeholder="Ketik topik berita di sini..." class="w-full p-3 bg-white border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent text-sm font-medium shadow-sm outline-none">
+                    <button onclick="generateNewsAI()" type="button" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl text-sm font-bold shadow-md whitespace-nowrap transition-transform transform hover:-translate-y-0.5" id="btn-news-ai">Buat ✨</button>
+                </div>
+            </div>
+
+            <div class="space-y-4 mb-8">
+                <input type="hidden" id="news-id">
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Judul Berita</label>
+                    <input type="text" id="news-title" placeholder="Masukkan judul..." class="w-full p-4 bg-bglight border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:bg-white text-sm font-bold outline-none transition-colors">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Deskripsi Singkat</label>
+                    <textarea id="news-desc" placeholder="Isi ringkasan..." class="w-full p-4 bg-bglight border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:bg-white text-sm font-medium outline-none transition-colors" rows="2"></textarea>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">URL Tautan (Opsional)</label>
+                    <input type="url" id="news-link" placeholder="https://..." class="w-full p-4 bg-bglight border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:bg-white text-sm font-medium text-blue-600 outline-none transition-colors">
+                </div>
+            </div>
+            <div class="flex gap-4 justify-end">
+                <button onclick="closeModal('modal-add-news')" class="bg-bglight border border-gray-200 text-gray-600 hover:bg-gray-100 px-6 py-3.5 rounded-xl text-sm font-bold transition-colors">Batal</button>
+                <button onclick="saveNews()" class="bg-primary hover:bg-secondary text-white px-8 py-3.5 rounded-xl text-sm font-bold shadow-lg transition-transform transform hover:-translate-y-1">Publikasi</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-admin-pengajuan" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center fade-in">
+        <div class="bg-white rounded-[2rem] shadow-2xl p-8 max-w-md w-full mx-4 border border-white/20">
+            <h3 class="text-2xl font-extrabold text-primary mb-6 border-b border-gray-100 pb-4 tracking-tight">Setujui Pengajuan</h3>
+            <input type="hidden" id="admin-kelola-id">
+            <div class="space-y-5 mb-8">
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Pembaruan Status</label>
+                    <select id="admin-kelola-status" class="w-full p-4 bg-bglight border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary text-sm font-bold outline-none cursor-pointer appearance-none">
+                        <option value="Menunggu persetujuan">⏳ Menunggu Persetujuan</option>
+                        <option value="Disetujui">✅ Disetujui (Tentukan Jadwal)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Estimasi Jadwal Berangkat</label>
+                    <input type="date" id="admin-kelola-tgl" class="w-full p-4 bg-bglight border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary text-sm font-bold outline-none cursor-pointer">
+                </div>
+            </div>
+            <div class="flex gap-4 justify-end">
+                <button onclick="closeModal('modal-admin-pengajuan')" class="bg-bglight border border-gray-200 text-gray-600 hover:bg-gray-100 px-6 py-3.5 rounded-xl text-sm font-bold transition-colors">Batal</button>
+                <button onclick="saveAdminKelola()" class="bg-primary hover:bg-secondary text-white px-8 py-3.5 rounded-xl text-sm font-bold shadow-lg transition-transform transform hover:-translate-y-1">Simpan Data</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 1: STATUS MEDICAL (BISA MASSAL) -->
+    <div id="modal-admin-status" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center fade-in">
+        <div class="bg-white rounded-[2rem] shadow-2xl p-8 max-w-md w-full mx-4 border border-white/20">
+            <h3 class="text-2xl font-extrabold text-primary mb-6 border-b border-gray-100 pb-4 tracking-tight"><i class="fa-solid fa-notes-medical text-accent mr-2"></i> Pembaruan Status Medis</h3>
+            <input type="hidden" id="admin-status-ids">
+            
+            <div class="space-y-5 mb-8">
+                <div id="bulk-warning-msg" class="hidden bg-yellow-50 border border-yellow-200 p-3 rounded-xl mb-4">
+                    <p class="text-xs font-bold text-yellow-800"><i class="fa-solid fa-users text-yellow-600 mr-1"></i> MODE MASSAL AKTIF</p>
+                    <p class="text-[10px] text-yellow-700 mt-1">Status akan diterapkan ke semua siswa yang dipilih. Catatan akan ditimpa.</p>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Keputusan Medis</label>
+                    <select id="admin-status-value" class="w-full p-4 bg-bglight border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary text-sm font-bold outline-none cursor-pointer appearance-none">
+                        <option value="BELUM">Belum Ada Hasil</option>
+                        <option value="SUDAH MCU, MENUNGGU HASIL">🔄 Sudah MCU, Tunggu Hasil</option>
+                        <option value="FIT">✅ FIT (Lolos)</option>
+                        <option value="FIT WITH NOTE">⚠️ FIT WITH NOTE (Perlu Perhatian)</option>
+                        <option value="UNFIT">❌ UNFIT (Gagal)</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Catatan Dokter (Opsional)</label>
+                    <textarea id="admin-status-catatan" rows="3" class="w-full p-4 bg-bglight border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary text-sm font-medium outline-none placeholder-gray-400" placeholder="Ketik saran atau alasan khusus..."></textarea>
+                </div>
+            </div>
+            
+            <div class="flex gap-4 justify-end">
+                <button onclick="closeModal('modal-admin-status')" class="bg-bglight border border-gray-200 text-gray-600 hover:bg-gray-100 px-6 py-3.5 rounded-xl text-sm font-bold transition-colors">Batal</button>
+                <button onclick="saveAdminStatus()" id="btn-kirim-status" class="bg-primary hover:bg-secondary text-white px-8 py-3.5 rounded-xl text-sm font-bold shadow-lg transition-transform transform hover:-translate-y-1">Terapkan Status</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: KHUSUS UPLOAD PDF (SATUAN) -->
+    <div id="modal-admin-pdf" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center fade-in">
+        <div class="bg-white rounded-[2rem] shadow-2xl p-8 max-w-md w-full mx-4 border border-white/20">
+            <h3 class="text-2xl font-extrabold text-primary mb-6 border-b border-gray-100 pb-4 tracking-tight"><i class="fa-solid fa-file-pdf text-red-400 mr-2"></i> Kelola Dokumen PDF</h3>
+            <input type="hidden" id="admin-pdf-id">
+            
+            <div class="space-y-5 mb-8">
+                <div class="bg-blue-50/50 p-4 rounded-2xl border border-blue-100 flex justify-between items-center">
+                    <div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Nama Siswa</p>
+                        <p class="text-sm font-extrabold text-blue-900" id="pdf-student-name">-</p>
+                    </div>
+                </div>
+
+                <div id="pdf-status-area" class="mb-2">
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Status Saat Ini</label>
+                    <div id="pdf-status-text"></div>
+                </div>
+
+                <div id="existing-pdf-area-pdf" class="hidden p-4 bg-green-50 border border-green-200 rounded-2xl flex items-center justify-between shadow-sm transition-all mb-4">
+                    <div class="flex items-center">
+                        <i class="fa-solid fa-file-pdf text-green-600 text-3xl mr-3 opacity-80"></i>
+                        <div>
+                            <p class="text-xs font-black text-green-800 tracking-tight">Dokumen Tersimpan</p>
+                            <a id="existing-pdf-link-pdf" href="#" target="_blank" class="text-[10px] text-blue-600 hover:text-blue-800 underline font-bold mt-0.5 inline-block"><i class="fa-solid fa-eye"></i> Buka/Lihat File Saat Ini</a>
+                        </div>
+                    </div>
+                    <button type="button" onclick="hapusPDFTersimpan()" class="bg-white text-red-500 hover:bg-red-50 border border-red-100 p-2.5 rounded-xl text-xs font-bold transition-colors shadow-sm" title="Hapus Dokumen dari Database"><i class="fa-solid fa-trash-can"></i> Hapus</button>
+                </div>
+
+                <div class="pt-2 border-t border-gray-100">
+                    <label id="drop-zone-label" class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 mt-4">Unggah PDF Baru</label>
+                    <div id="drop-zone" class="border-2 border-dashed border-gray-300 bg-bglight hover:border-primary hover:bg-white rounded-2xl p-8 text-center transition-all cursor-pointer relative group">
+                        <input type="file" id="admin-hasil-file" accept="application/pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                        <div class="bg-white w-16 h-16 rounded-full shadow-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 border border-gray-100">
+                            <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 group-hover:text-primary transition-colors"></i>
+                        </div>
+                        <p class="text-sm text-gray-800 font-bold mb-1">Tarik PDF ke area ini</p>
+                        <p class="text-xs text-gray-500 font-medium">Atau klik untuk mencari file (Maks 3MB)</p>
+                        
+                        <div id="file-name-display" class="hidden mt-5 bg-white p-3 rounded-xl border border-green-200 flex items-center justify-between z-20 relative shadow-sm">
+                            <span class="text-[11px] font-extrabold text-green-700 truncate mr-2 flex items-center"><i class="fa-solid fa-check-circle mr-1"></i> <span id="file-name-text">filename.pdf</span></span>
+                            <button type="button" onclick="hapusFilePDF(event)" class="text-gray-400 hover:text-red-500 p-1 transition-colors"><i class="fa-solid fa-times-circle text-lg"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex gap-4 justify-end">
+                <button onclick="closeModal('modal-admin-pdf')" class="bg-bglight border border-gray-200 text-gray-600 hover:bg-gray-100 px-6 py-3.5 rounded-xl text-sm font-bold transition-colors">Tutup</button>
+                <button onclick="saveAdminPDF()" id="btn-kirim-pdf" class="bg-primary hover:bg-secondary text-white px-8 py-3.5 rounded-xl text-sm font-bold shadow-lg transition-transform transform hover:-translate-y-1">Mulai Unggah</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Utama -->
     <script>
-        // =========================================================================
-        // 🔴 AREA API GOOGLE SHEETS (UNTUK NANTI)
-        // Saat ini aplikasi menggunakan localStorage (memori HP/Komputer) agar 
-        // Anda bisa mencoba tampilannya sekarang juga tanpa error.
-        // Nanti, ketika Anda sudah punya link App Script dari Google Sheets,
-        // masukkan link-nya ke variabel di bawah ini.
-        // =========================================================================
-        const GOOGLE_SHEETS_API_URL = "https://script.google.com/macros/s/AKfycbyQW--N4pKK2yMb7OUaCq-zZjLatnpKyYV074jEc1CdXVNb_f65Y_J-rPIM3LIlSiNGfA/exec"; // <-- CONTOH: "https://script.google.com/macros/s/AKfycb.../exec"
+        const API_URL = "https://script.google.com/macros/s/AKfycbySwMYw9sN7XBqFvqBIZ56ji-fdClc8VSL2saRdYVHX58GRlipbpnyEGx5VoTeNXU_z/exec";
+        const adminCreds = { u: 'adminmcuyonasindo', p: 'admin321' };
+        const staffCreds = { u: 'mcuyonasindo', p: 'viewer321' };
+        let state = { currentUser: null, users: [], news: [], requests: [] };
+        let currentCalDate = new Date(); 
+
+        let selectedBulkIds = [];
+        let selectedFileBase64 = null;
+        let selectedFileName = null;
+        let selectedFileMime = null;
         
-        // =========================================================================
-        // DATABASE SEMENTARA (MENGGUNAKAN LOCALSTORAGE BROWSER)
-        // =========================================================================
-        // Sesuai Sheet 1: name, u, p, email, phone
-        let usersDB = JSON.parse(localStorage.getItem('mcu_users')) || [];
-        // Sesuai Sheet 2: id, owner, nohp, kumiai, klinik, tipe, status, hasil, tglMcu, tglInput, timestamp
-        let recordsDB = JSON.parse(localStorage.getItem('mcu_records')) || [];
+        let deleteExistingPdf = false;
         
-        let currentUser = null; // Menyimpan data user yang sedang login
+        // VARIABEL GLOBAL UNTUK PAGINATION
+        let currentPage = 1;
+        let currentKelolaPage = 1; // Tambahan untuk Kelola Pengajuan
+        const itemsPerPage = 10;
 
-        // Fungsi menyimpan ke memori (Ini yang nanti diganti dengan kode API Google Sheets)
-        function saveToDatabase() {
-            localStorage.setItem('mcu_users', JSON.stringify(usersDB));
-            localStorage.setItem('mcu_records', JSON.stringify(recordsDB));
-        }
-
-        // =========================================================================
-        // LOGIKA TAMPILAN (UI)
-        // =========================================================================
-        
-        // Pindah antara Login dan Register
-        function toggleAuth(type) {
-            document.getElementById('login-form').classList.toggle('hidden-page', type !== 'login');
-            document.getElementById('register-form').classList.toggle('hidden-page', type !== 'register');
-        }
-
-        // Pindah Menu (Page)
-        function changePage(pageId) {
-            // Sembunyikan semua page termasuk page AI
-            const pages = ['page-siswa-home', 'page-siswa-pengajuan', 'page-siswa-hasil', 'page-siswa-ai', 'page-admin-persetujuan', 'page-admin-hasil'];
-            pages.forEach(p => document.getElementById(p).classList.add('hidden-page'));
-            
-            // Tampilkan page yang dipilih
-            document.getElementById('page-' + pageId).classList.remove('hidden-page');
-
-            // Render ulang data sesuai halaman yang dibuka
-            if (pageId === 'siswa-pengajuan') renderSiswaPengajuan();
-            if (pageId === 'siswa-hasil') renderSiswaHasil();
-            if (pageId === 'admin-persetujuan') renderAdminPersetujuan();
-            if (pageId === 'admin-hasil') renderAdminHasil();
-        }
-
-        // =========================================================================
-        // LOGIKA AUTENTIKASI (LOGIN & DAFTAR)
-        // =========================================================================
-
-        function handleRegister(e) {
-            e.preventDefault(); // Mencegah layar refresh
-            const name = document.getElementById('reg-name').value;
-            const phone = document.getElementById('reg-phone').value;
-            const email = document.getElementById('reg-email').value;
-            const u = document.getElementById('reg-username').value;
-            const p = document.getElementById('reg-password').value;
-
-            // Cek apakah username sudah ada
-            if (usersDB.find(user => user.u === u)) {
-                alert("Username sudah digunakan! Silakan pilih yang lain.");
-                return;
+        async function fetchAPI(action, payload = {}) {
+            if(action !== 'saveRequest' || !payload.fileData) {
+                document.getElementById('loader').style.display = 'flex';
+                document.getElementById('loader-text').innerText = 'MEMPROSES DATA...';
             }
-
-            // Simpan data (Sheet 1)
-            usersDB.push({ name, u, p, email, phone });
-            saveToDatabase();
-            
-            alert("Pendaftaran berhasil! Silakan login.");
-            toggleAuth('login');
-            document.getElementById('register-form').reset();
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action, payload })
+                });
+                const res = await response.json();
+                document.getElementById('loader').style.display = 'none';
+                return res;
+            } catch (error) {
+                document.getElementById('loader').style.display = 'none';
+                showAlert("Error", "Gagal terhubung ke database. Coba lagi.");
+                return { status: 'error' };
+            }
         }
 
-        function handleLogin(e) {
-            e.preventDefault();
+        async function refreshDataAndUI(successMessage) {
+            document.getElementById('loader').style.display = 'flex';
+            document.getElementById('loader-text').innerHTML = "MEMPERBARUI DATA...<br><span class='text-[10px] font-medium text-gray-500 tracking-normal mt-2 block'>(Mohon tunggu sebentar)</span>";
+            
+            const res = await fetchAPI('getAllData');
+            if(res && res.status === 'success') {
+                state.users = res.data.users || [];
+                state.news = res.data.news || [];
+                state.requests = (res.data.requests || []).map(r => ({
+                    ...r, tglLahir: toYYYYMMDD(r.tglLahir), tglReq: toYYYYMMDD(r.tglReq), tglEst: toYYYYMMDD(r.tglEst)
+                }));
+                
+                updateStats();
+                
+                const currentView = sessionStorage.getItem('mcu_current_view');
+                if (currentView === 'view-kelola-pengajuan') renderKelolaPengajuan();
+                if (currentView === 'view-hasil') renderHasilMedical();
+                if (currentView === 'view-dashboard') renderNews(state.currentUser && state.currentUser.role === 'admin');
+                if (currentView === 'view-pengajuan') renderRiwayatPengajuan();
+                if (currentView === 'view-calendar') renderCalendar();
+                
+                document.getElementById('loader').style.display = 'none';
+                
+                if(successMessage) showAlert("Berhasil", successMessage);
+            } else {
+                document.getElementById('loader').style.display = 'none';
+                showAlert("Peringatan", "Data gagal dimuat ulang. Silakan refresh manual.");
+            }
+        }
+
+        function formatTglIndo(dateStr) {
+            if(!dateStr || dateStr === "-" || dateStr === "") return "-";
+            try {
+                const dateObj = new Date(dateStr);
+                if (isNaN(dateObj.getTime())) return dateStr; 
+                return dateObj.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            } catch(e) { return dateStr; }
+        }
+
+        function toYYYYMMDD(dateStr) {
+            if(!dateStr || dateStr === "-" || dateStr === "") return '';
+            try {
+                if(typeof dateStr === 'string' && dateStr.length === 10 && dateStr.includes('-')) return dateStr;
+                const dt = new Date(dateStr);
+                if(isNaN(dt.getTime())) return dateStr;
+                return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+            } catch(e) { return dateStr; }
+        }
+
+        window.onload = async () => {
+            const res = await fetchAPI('getAllData');
+            if(res && res.status === 'success') {
+                state.users = res.data.users || [];
+                state.news = res.data.news || [];
+                state.requests = (res.data.requests || []).map(r => ({
+                    ...r, tglLahir: toYYYYMMDD(r.tglLahir), tglReq: toYYYYMMDD(r.tglReq), tglEst: toYYYYMMDD(r.tglEst)
+                }));
+            }
+            const savedSession = sessionStorage.getItem('mcu_active_user');
+            const savedView = sessionStorage.getItem('mcu_current_view');
+            if(savedSession) {
+                state.currentUser = JSON.parse(savedSession);
+                showApp(state.currentUser.role);
+                if(savedView) navigate(savedView);
+            } else {
+                showView('view-auth');
+            }
+        };
+
+        function toggleAuth(type) {
+            if(type === 'register') {
+                document.getElementById('form-login').classList.add('hidden');
+                document.getElementById('form-register').classList.remove('hidden');
+            } else {
+                document.getElementById('form-register').classList.add('hidden');
+                document.getElementById('form-login').classList.remove('hidden');
+            }
+        }
+        
+        function validateHP(input) { input.value = input.value.replace(/\D/g, ''); }
+        function formatNamaEYD(input) {
+            let cursorPosition = input.selectionStart;
+            let val = input.value.toLowerCase();
+            val = val.replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase());
+            input.value = val;
+            input.setSelectionRange(cursorPosition, cursorPosition);
+        }
+        function validateUsername(input) { 
+            if(/\s/.test(input.value)) {
+                document.getElementById('err-username').classList.remove('hidden');
+                input.value = input.value.replace(/\s/g, ''); 
+            } else {
+                document.getElementById('err-username').classList.add('hidden');
+            }
+        }
+        function validatePassword(input) {
+            const val = input.value;
+            const err = document.getElementById('err-pwd');
+            if(val.length > 0 && !(/^(?=.*[a-zA-Z])(?=.*[0-9])/.test(val))) err.classList.remove('hidden');
+            else err.classList.add('hidden');
+        }
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash", "text-primary");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash", "text-primary");
+                icon.classList.add("fa-eye");
+            }
+        }
+
+        function handleLogin() {
             const u = document.getElementById('login-username').value;
             const p = document.getElementById('login-password').value;
-
-            // 1. Cek jika yang login Admin (Username & Password tetap)
-            if (u === 'adminmcuyonasindo' && p === 'admin') {
-                currentUser = { role: 'admin', name: 'Administrator MCU' };
-                loginSuccess();
-                return;
+            if(u === adminCreds.u && p === adminCreds.p) {
+                state.currentUser = { role: 'admin', nama: 'Admin Yonasindo' };
+                loginSuccess(); return;
             }
-
-            // 2. Cek jika yang login Siswa
-            const foundUser = usersDB.find(user => user.u === u && user.p === p);
-            if (foundUser) {
-                currentUser = { role: 'siswa', ...foundUser }; // Gabungkan data user
-                loginSuccess();
-            } else {
-                alert("Username atau Password salah!");
+            if(u === staffCreds.u && p === staffCreds.p) {
+                state.currentUser = { role: 'staff', nama: 'Staff Yonasindo' };
+                loginSuccess(); return;
             }
+            const user = state.users.find(x => x.username === u && x.password === p);
+            if(user) { state.currentUser = { role: `siswa_${user.target}`, ...user }; loginSuccess(); }
+            else showAlert("Autentikasi Gagal", "Username atau Password yang Anda masukkan tidak sesuai.");
         }
-
         function loginSuccess() {
-            // Sembunyikan form login, tampilkan dashboard
-            document.getElementById('auth-page').classList.add('hidden-page');
-            document.getElementById('sidebar').classList.remove('hidden-page');
-            document.getElementById('main-content').classList.remove('hidden-page');
-
-            // Setel nama di sidebar
-            document.getElementById('display-user-name').innerText = currentUser.name;
-            document.getElementById('display-user-role').innerText = currentUser.role === 'admin' ? 'Admin / Petugas' : 'Siswa';
-
-            // Atur menu yang tampil
-            if (currentUser.role === 'admin') {
-                document.getElementById('menu-admin').classList.remove('hidden-page');
-                changePage('admin-persetujuan'); // Halaman pertama admin
-            } else {
-                document.getElementById('menu-siswa').classList.remove('hidden-page');
-                document.getElementById('mcu-name').value = currentUser.name; // Isi otomatis form pengajuan
-                document.getElementById('mcu-phone').value = currentUser.phone;
-                changePage('siswa-home'); // Halaman pertama siswa
+            sessionStorage.setItem('mcu_active_user', JSON.stringify(state.currentUser));
+            showApp(state.currentUser.role);
+        }
+        async function handleRegister() {
+            let namaRaw = document.getElementById('reg-nama').value;
+            const nama = namaRaw.toLowerCase().replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase());
+            const email = document.getElementById('reg-email').value;
+            const hp = document.getElementById('reg-hp').value;
+            const target = document.getElementById('reg-negara').value;
+            const u = document.getElementById('reg-username').value;
+            const p = document.getElementById('reg-password').value;
+            
+            if(!nama || !hp || !u || !p) return showAlert("Peringatan", "Mohon lengkapi seluruh formulir pendaftaran!");
+            if(/\s/.test(u)) return showAlert("Peringatan", "Username tidak boleh mengandung spasi!");
+            if(!(/^(?=.*[a-zA-Z])(?=.*[0-9])/.test(p))) return showAlert("Keamanan Lemah", "Password wajib mengandung kombinasi huruf dan angka!");
+            
+            const newUser = { id: Date.now(), nama: nama, email, hp, target, username: u, password: p, role: `siswa_${target}` };
+            const res = await fetchAPI('saveUser', newUser);
+            
+            if(res.status === 'success') {
+                state.users.push(newUser);
+                showAlert("Pendaftaran Sukses", "Akun berhasil dibuat! Silakan masuk menggunakan username dan password Anda.");
+                toggleAuth('login');
             }
         }
-
-        function handleLogout() {
-            currentUser = null;
-            document.getElementById('login-form').reset();
-            
-            // Sembunyikan dashboard, kembalikan ke login
-            document.getElementById('auth-page').classList.remove('hidden-page');
-            document.getElementById('sidebar').classList.add('hidden-page');
-            document.getElementById('main-content').classList.add('hidden-page');
-            document.getElementById('menu-admin').classList.add('hidden-page');
-            document.getElementById('menu-siswa').classList.add('hidden-page');
+        function logout() {
+            sessionStorage.clear();
+            state.currentUser = null;
+            document.getElementById('navbar').classList.add('hidden-view');
+            document.getElementById('bottom-nav').classList.add('hidden-view');
+            showView('view-auth');
         }
 
-        // =========================================================================
-        // LOGIKA SISWA
-        // =========================================================================
-
-        function submitMCU(e) {
-            e.preventDefault();
+        function showView(viewId) {
+            const views = ['view-auth','view-dashboard','view-pengajuan','view-kelola-pengajuan','view-hasil','view-calendar'];
             
-            // Ambil data form (Sesuai kolom Sheet 2)
-            const newRecord = {
-                id: "MCU-" + Date.now(), // ID unik otomatis
-                owner: currentUser.name,
-                nohp: currentUser.phone,
-                kumiai: document.getElementById('mcu-kumiai').value,
-                klinik: document.getElementById('mcu-klinik').value,
-                tipe: document.getElementById('mcu-paket').value,
-                status: "Menunggu Persetujuan", // Status Awal
-                hasil: "-", // Belum ada hasil
-                tglMcu: document.getElementById('mcu-dob').value, // Tgl Lahir / Tgl MCU
-                tglInput: "", // Diisi admin nanti
-                timestamp: new Date().toLocaleString()
-            };
-
-            recordsDB.push(newRecord);
-            saveToDatabase();
-            
-            alert("Pengajuan MCU berhasil dibuat!");
-            document.getElementById('mcu-kumiai').value = '';
-            changePage('siswa-pengajuan');
-        }
-
-        function renderSiswaPengajuan() {
-            const container = document.getElementById('container-pengajuan-saya');
-            container.innerHTML = ''; // Kosongkan dulu
-
-            // Cari pengajuan milik siswa ini
-            const myRequests = recordsDB.filter(rec => rec.owner === currentUser.name);
-
-            // JIKA KOSONG (Sesuai instruksi Anda)
-            if (myRequests.length === 0) {
-                container.innerHTML = `
-                    <div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200">
-                        <b>Anda belum mengajukan pengajuan MCU, Silahkan buat pengajuan MCU terlebih dahulu!</b>
-                    </div>
-                `;
-                return;
-            }
-
-            // Jika ada, tampilkan
-            myRequests.forEach(req => {
-                let statusColor = req.status === 'Disetujui' ? 'text-green-600 bg-green-100' : 'text-yellow-600 bg-yellow-100';
-                
-                container.innerHTML += `
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                        <div class="flex flex-col md:flex-row justify-between md:items-center">
-                            <div>
-                                <h3 class="font-bold text-lg">${req.tipe}</h3>
-                                <p class="text-sm text-gray-600">${req.klinik} | Kumiai: ${req.kumiai}</p>
-                                <p class="text-xs text-gray-400 mt-1">Diajukan: ${req.timestamp}</p>
-                            </div>
-                            <div class="mt-3 md:mt-0">
-                                <span class="px-3 py-1 text-sm font-bold rounded-full ${statusColor}">${req.status}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function renderSiswaHasil() {
-            const table = document.getElementById('table-siswa-hasil');
-            table.innerHTML = ''; // Kosongkan
-
-            // Ambil data yang sudah "Disetujui" oleh admin
-            const approvedRecords = recordsDB.filter(rec => rec.status === 'Disetujui');
-
-            if (approvedRecords.length === 0) {
-                table.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500">Belum ada database hasil MCU</td></tr>`;
-                return;
-            }
-
-            approvedRecords.forEach(req => {
-                // SENSOR PRIVASI ****
-                // Jika milik sendiri, tampilkan hasil. Jika milik orang lain, berikan ****
-                let tampilanHasil = (req.owner === currentUser.name) ? req.hasil : "****";
-                
-                // Beri warna background khusus untuk data milik sendiri
-                let rowBg = (req.owner === currentUser.name) ? 'bg-green-50' : '';
-
-                // Warna teks hasil
-                let badgeClass = "bg-gray-100 text-gray-600";
-                if(tampilanHasil === "FIT TO WORK") badgeClass = "bg-green-100 text-green-700 font-bold";
-                if(tampilanHasil === "FIT WITH NOTE") badgeClass = "bg-yellow-100 text-yellow-700 font-bold";
-                if(tampilanHasil === "UNFIT") badgeClass = "bg-red-100 text-red-700 font-bold";
-                if(tampilanHasil === "-") {
-                     tampilanHasil = "Menunggu";
-                     badgeClass = "bg-blue-100 text-blue-700";
+            views.forEach(v => {
+                const el = document.getElementById(v);
+                if(el) {
+                    if(v === viewId) {
+                        el.classList.remove('hidden-view');
+                        el.classList.remove('page-enter');
+                        void el.offsetWidth; 
+                        el.classList.add('page-enter');
+                    } else {
+                        el.classList.add('hidden-view');
+                        el.classList.remove('page-enter');
+                    }
                 }
-
-                table.innerHTML += `
-                    <tr class="${rowBg}">
-                        <td class="p-3 text-sm">${req.timestamp.split(',')[0]}</td>
-                        <td class="p-3 font-semibold text-sm">
-                            ${req.owner} 
-                            ${req.owner === currentUser.name ? '<span class="ml-2 text-xs bg-green-200 text-green-800 px-2 rounded-full">Anda</span>' : ''}
-                        </td>
-                        <td class="p-3 text-sm">${req.klinik}<br><span class="text-xs text-gray-500">${req.tipe}</span></td>
-                        <td class="p-3 text-center">
-                            <span class="px-2 py-1 rounded text-xs ${tampilanHasil === '****' ? 'bg-gray-200 text-gray-500 tracking-widest' : badgeClass}">
-                                ${tampilanHasil}
-                            </span>
-                        </td>
-                    </tr>
-                `;
             });
-        }
-
-        // =========================================================================
-        // LOGIKA ADMIN
-        // =========================================================================
-
-        function renderAdminPersetujuan() {
-            const container = document.getElementById('container-admin-persetujuan');
-            container.innerHTML = '';
-
-            const pendingRecords = recordsDB.filter(rec => rec.status === 'Menunggu Persetujuan');
-
-            if (pendingRecords.length === 0) {
-                container.innerHTML = `<div class="p-4 text-center text-gray-500 bg-white rounded-lg border">Tidak ada pengajuan MCU baru.</div>`;
-                return;
+            
+            const footer = document.getElementById('global-footer');
+            const fText1 = document.getElementById('footer-text-1');
+            const fText2 = document.getElementById('footer-text-2');
+            const fAuthor = document.getElementById('footer-author');
+            
+            if(footer) {
+                if(viewId === 'view-auth') {
+                    footer.classList.remove('border-gray-200/60', 'bg-transparent');
+                    footer.classList.add('border-white/10', 'bg-[#070707]');
+                    fText1.className = "text-[11px] md:text-xs font-medium text-gray-500 tracking-wide";
+                    fText2.className = "text-[11px] md:text-xs font-medium text-gray-500 tracking-wide";
+                    fAuthor.className = "font-bold text-gray-400";
+                } else {
+                    footer.classList.remove('border-white/10', 'bg-[#070707]');
+                    footer.classList.add('border-gray-200/60', 'bg-transparent');
+                    fText1.className = "text-[11px] md:text-xs font-medium text-gray-400 tracking-wide";
+                    fText2.className = "text-[11px] md:text-xs font-medium text-gray-400 tracking-wide";
+                    fAuthor.className = "font-bold text-gray-500";
+                }
             }
 
-            pendingRecords.forEach(req => {
-                container.innerHTML += `
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col md:flex-row justify-between md:items-center">
-                        <div>
-                            <h3 class="font-bold text-lg">${req.owner}</h3>
-                            <p class="text-sm text-gray-600">No. HP: ${req.nohp} | Kumiai: ${req.kumiai}</p>
-                            <p class="text-sm text-gray-600 font-medium mt-1">Paket: ${req.tipe} di ${req.klinik}</p>
-                        </div>
-                        <button onclick="approveRecord('${req.id}')" class="mt-3 md:mt-0 px-4 py-2 bg-green-600 text-white font-bold rounded hover:bg-green-700 transition">
-                            Setujui Pengajuan
-                        </button>
-                    </div>
-                `;
+            document.querySelectorAll('.nav-item-mob').forEach(el => {
+                if(el.getAttribute('data-target') === viewId) {
+                    el.classList.add('text-primary');
+                    el.classList.remove('text-gray-400');
+                    if(!el.querySelector('.active-dot')) {
+                        el.innerHTML += `<div class="active-dot w-1.5 h-1.5 bg-primary rounded-full mt-1"></div>`;
+                    }
+                } else {
+                    el.classList.remove('text-primary');
+                    el.classList.add('text-gray-400');
+                    const dot = el.querySelector('.active-dot');
+                    if(dot) dot.remove();
+                }
             });
-        }
 
-        function approveRecord(id) {
-            // Cari data, ubah status
-            let rec = recordsDB.find(r => r.id === id);
-            if (rec) {
-                rec.status = 'Disetujui';
-                saveToDatabase();
-                alert('Pengajuan disetujui! Data berpindah ke menu Hasil MCU.');
-                renderAdminPersetujuan(); // Refresh tampilan
-            }
-        }
-
-        function renderAdminHasil() {
-            const table = document.getElementById('table-admin-hasil');
-            table.innerHTML = '';
-
-            const approvedRecords = recordsDB.filter(rec => rec.status === 'Disetujui');
-
-            if (approvedRecords.length === 0) {
-                table.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500">Belum ada pengajuan yang disetujui.</td></tr>`;
-                return;
-            }
-
-            approvedRecords.forEach(req => {
-                let badgeClass = "bg-gray-100 text-gray-600";
-                if(req.hasil === "FIT TO WORK") badgeClass = "bg-green-100 text-green-700";
-                if(req.hasil === "FIT WITH NOTE") badgeClass = "bg-yellow-100 text-yellow-700";
-                if(req.hasil === "UNFIT") badgeClass = "bg-red-100 text-red-700";
-
-                table.innerHTML += `
-                    <tr>
-                        <td class="p-3 text-xs text-gray-500">${req.id}<br>${req.timestamp.split(',')[0]}</td>
-                        <td class="p-3 font-semibold text-sm">${req.owner}<br><span class="font-normal text-xs text-gray-500">Kumiai: ${req.kumiai}</span></td>
-                        <td class="p-3 text-sm">${req.klinik}<br><span class="text-xs text-gray-500">${req.tipe}</span></td>
-                        <td class="p-3 text-center">
-                            <select onchange="updateHasilMCU('${req.id}', this.value)" class="p-1 border rounded text-sm focus:ring-green-500 ${badgeClass}">
-                                <option value="-" ${req.hasil === '-' ? 'selected' : ''}>Pilih Hasil</option>
-                                <option value="FIT TO WORK" ${req.hasil === 'FIT TO WORK' ? 'selected' : ''}>FIT TO WORK</option>
-                                <option value="FIT WITH NOTE" ${req.hasil === 'FIT WITH NOTE' ? 'selected' : ''}>FIT WITH NOTE</option>
-                                <option value="UNFIT" ${req.hasil === 'UNFIT' ? 'selected' : ''}>UNFIT</option>
-                            </select>
-                        </td>
-                    </tr>
-                `;
+            document.querySelectorAll('.nav-item-desk').forEach(el => {
+                if(el.getAttribute('data-target') === viewId) {
+                    el.classList.add('bg-white', 'text-primary', 'shadow-sm');
+                    el.classList.remove('text-gray-600', 'hover:bg-gray-100');
+                } else {
+                    el.classList.remove('bg-white', 'text-primary', 'shadow-sm');
+                    el.classList.add('text-gray-600', 'hover:bg-gray-100');
+                }
             });
-        }
 
-        function updateHasilMCU(id, nilaiHasil) {
-            let rec = recordsDB.find(r => r.id === id);
-            if (rec) {
-                rec.hasil = nilaiHasil;
-                rec.tglInput = new Date().toLocaleString(); // Menyimpan kapan admin isi
-                saveToDatabase();
-                
-                // Ubah warna dropdown langsung setelah diubah
-                renderAdminHasil();
+            if(viewId !== 'view-auth') {
+                sessionStorage.setItem('mcu_current_view', viewId);
+                clearBulkSelection(); 
             }
         }
 
-        // =========================================================================
-        // LOGIKA INTEGRASI GEMINI API (ASISTEN AI)
-        // =========================================================================
-        
-        const chatHistoryContainer = document.getElementById('chat-history');
-        
-        async function handleChatSubmit(e) {
-            e.preventDefault();
-            const inputEl = document.getElementById('chat-input');
-            const submitBtn = document.getElementById('chat-submit-btn');
-            
-            const userText = inputEl.value.trim();
-            if (!userText) return;
-
-            // Tambahkan pesan user ke UI
-            appendChatMessage(userText, 'user');
-            inputEl.value = '';
-            
-            // Tampilkan loading & matikan input sementara
-            inputEl.disabled = true;
-            submitBtn.disabled = true;
-            const loadingId = appendLoading();
-
-            try {
-                // Panggil Gemini API
-                const aiResponse = await callGeminiAPI(userText);
-                removeLoading(loadingId);
-                appendChatMessage(aiResponse, 'ai');
-            } catch (error) {
-                removeLoading(loadingId);
-                appendChatMessage("Maaf, sepertinya koneksi ke AI sedang bermasalah. Silakan coba lagi nanti.", 'error');
-            } finally {
-                inputEl.disabled = false;
-                submitBtn.disabled = false;
-                inputEl.focus();
-            }
+        function showApp(role) {
+            document.getElementById('navbar').classList.remove('hidden-view');
+            document.getElementById('bottom-nav').classList.remove('hidden-view');
+            buildNavbar(role);
+            setupDashboard(role);
+            showView('view-dashboard');
         }
 
-        function appendChatMessage(text, sender) {
-            const div = document.createElement('div');
-            
-            // Ganti format markdown sederhana ke HTML (bolding)
-            const formattedText = text
-                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-                .replace(/\*(.*?)\*/g, '<i>$1</i>')
-                .replace(/\n/g, '<br>');
-
-            if (sender === 'user') {
-                div.className = "bg-green-600 text-white p-3 rounded-2xl rounded-tr-sm max-w-[85%] self-end shadow-sm text-sm md:text-base ml-auto";
-                div.innerHTML = formattedText;
-            } else if (sender === 'ai') {
-                div.className = "bg-green-100 text-green-800 p-3 rounded-2xl rounded-tl-sm max-w-[85%] self-start shadow-sm text-sm md:text-base";
-                div.innerHTML = formattedText;
+        function buildNavbar(role) {
+            let links = [];
+            if (role === 'admin') {
+                links = [
+                    {n:'Beranda',v:'view-dashboard',i:'fa-solid fa-home'},
+                    {n:'Kelola',v:'view-kelola-pengajuan',i:'fa-solid fa-list-check'},
+                    {n:'Hasil',v:'view-hasil',i:'fa-solid fa-file-waveform'},
+                    {n:'Kalender',v:'view-calendar',i:'fa-solid fa-calendar-day'}
+                ];
+            } else if (role === 'staff') {
+                links = [
+                    {n:'Beranda',v:'view-dashboard',i:'fa-solid fa-home'},
+                    {n:'Hasil',v:'view-hasil',i:'fa-solid fa-file-waveform'},
+                    {n:'Kalender',v:'view-calendar',i:'fa-solid fa-calendar-day'}
+                ];
             } else {
-                // error message
-                div.className = "bg-red-100 text-red-800 p-3 rounded-2xl max-w-[85%] self-center mx-auto text-sm text-center";
-                div.innerHTML = text;
+                links = [
+                    {n:'Beranda',v:'view-dashboard',i:'fa-solid fa-home'},
+                    {n:'Pengajuan',v:'view-pengajuan',i:'fa-solid fa-pen-to-square'},
+                    {n:'Hasil',v:'view-hasil',i:'fa-solid fa-file-medical'}
+                ];
             }
             
-            chatHistoryContainer.appendChild(div);
-            chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+            let htmlDesk = '', htmlMob = '';
+            links.forEach(l => {
+                htmlDesk += `<button onclick="navigate('${l.v}')" data-target="${l.v}" class="nav-item-desk flex items-center px-4 py-2 rounded-full text-sm font-bold transition-all"><i class="${l.i} mr-2"></i> ${l.n}</button>`;
+                htmlMob += `<button onclick="navigate('${l.v}')" data-target="${l.v}" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-primary transition-colors nav-item-mob focus:outline-none"><i class="${l.i} text-[22px] mb-1"></i></button>`;
+            });
+            document.getElementById('nav-links-desktop').innerHTML = htmlDesk;
+            document.getElementById('bottom-nav-links').innerHTML = htmlMob;
         }
 
-        function appendLoading() {
-            const id = 'loading-' + Date.now();
-            const div = document.createElement('div');
-            div.id = id;
-            div.className = "bg-green-100 p-4 rounded-2xl rounded-tl-sm max-w-[85px] self-start shadow-sm flex items-center h-[48px]";
+        function navigate(viewId) {
+            showView(viewId);
+            if(viewId === 'view-pengajuan') setupPengajuan();
+            if(viewId === 'view-kelola-pengajuan') renderKelolaPengajuan();
+            if(viewId === 'view-hasil') renderHasilMedical();
+            if(viewId === 'view-calendar') renderCalendar();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function setupDashboard(role) {
+            document.getElementById('dash-admin-greet').classList.add('hidden');
+            document.getElementById('dash-student-alert').classList.add('hidden');
+            document.getElementById('widget-news').classList.remove('hidden'); 
+            document.getElementById('btn-add-news').classList.add('hidden');
+            const info = document.getElementById('info-penyakit');
             
-            // Animasi loading sederhana (loader-dots)
-            div.innerHTML = `
-                <div class="loader-dots relative w-12 h-4">
-                    <div class="absolute top-0 mt-1 w-2 h-2 rounded-full bg-green-600"></div>
-                    <div class="absolute top-0 mt-1 w-2 h-2 rounded-full bg-green-600"></div>
-                    <div class="absolute top-0 mt-1 w-2 h-2 rounded-full bg-green-600"></div>
-                    <div class="absolute top-0 mt-1 w-2 h-2 rounded-full bg-green-600"></div>
+            if(role === 'admin') {
+                document.getElementById('dash-admin-greet').classList.remove('hidden');
+                document.getElementById('dash-admin-greet').innerHTML = `<p class="font-bold text-white"><i class="fa-solid fa-crown text-yellow-400 mr-2"></i> Mode Admin Aktif</p><p class="text-xs text-white/80 mt-1">Selamat datang kembali di pusat kendali medical.</p>`;
+                document.getElementById('btn-add-news').classList.remove('hidden');
+                renderNews(true);
+                info.innerHTML = "<div class='flex items-center justify-center h-32'><p class='italic text-gray-400 font-medium'><i class='fa-solid fa-shield-halved mr-2 text-xl'></i>Mode Pengawasan Admin Aktif.</p></div>";
+            } else if(role === 'staff') {
+                document.getElementById('dash-admin-greet').classList.remove('hidden');
+                document.getElementById('dash-admin-greet').innerHTML = `<p class="font-bold text-white"><i class="fa-solid fa-eye text-blue-400 mr-2"></i> Mode Staff (Viewer)</p><p class="text-xs text-white/80 mt-1">Akses pemantauan hasil MCU dan kalender.</p>`;
+                document.getElementById('btn-add-news').classList.add('hidden');
+                renderNews(false);
+                info.innerHTML = "<div class='flex items-center justify-center h-32'><p class='italic text-gray-400 font-medium'><i class='fa-solid fa-users-viewfinder mr-2 text-xl'></i>Akses Pemantauan Staff Aktif.</p></div>";
+            } else if(role === 'siswa_jepang') {
+                document.getElementById('dash-student-alert').classList.remove('hidden');
+                renderNews(false);
+                info.innerHTML = `<p class="font-extrabold text-primary mb-3"><i class="fa-solid fa-circle-exclamation text-yellow-500 mr-2"></i> Risiko Tinggi Penolakan (Jepang):</p>
+                    <ul class="space-y-3">
+                        <li class="flex items-start bg-bglight p-3 rounded-xl border border-gray-100"><i class="fa-solid fa-lungs-virus text-red-400 mt-1 mr-3 text-lg"></i> <div><strong class="text-gray-800">TBC & Flek Paru:</strong> <span class="text-gray-500">Sangat krusial untuk lolos COE.</span></div></li>
+                        <li class="flex items-start bg-bglight p-3 rounded-xl border border-gray-100"><i class="fa-solid fa-disease text-red-400 mt-1 mr-3 text-lg"></i> <div><strong class="text-gray-800">Hepatitis B/C & Sifilis:</strong> <span class="text-gray-500">Penyakit menular wajib steril.</span></div></li>
+                        <li class="flex items-start bg-bglight p-3 rounded-xl border border-gray-100"><i class="fa-solid fa-eye text-red-400 mt-1 mr-3 text-lg"></i> <div><strong class="text-gray-800">Buta Warna:</strong> <span class="text-gray-500">Menghambat pabrik presisi.</span></div></li>
+                        <li class="flex items-start bg-bglight p-3 rounded-xl border border-gray-100"><i class="fa-solid fa-heart-pulse text-red-400 mt-1 mr-3 text-lg"></i> <div><strong class="text-gray-800">Hipertensi ekstrim:</strong> <span class="text-gray-500">Gagal menahan beban fisik.</span></div></li>
+                    </ul>`;
+            } else {
+                document.getElementById('dash-student-alert').classList.remove('hidden');
+                document.getElementById('widget-news').classList.add('hidden');
+                info.innerHTML = `<p class="font-extrabold text-primary mb-3"><i class="fa-solid fa-circle-exclamation text-yellow-500 mr-2"></i> Risiko Tinggi Penolakan (Taiwan):</p>
+                    <ul class="space-y-3">
+                        <li class="flex items-start bg-bglight p-3 rounded-xl border border-gray-100"><i class="fa-solid fa-person-pregnant text-red-400 mt-1 mr-3 text-lg"></i> <div><strong class="text-gray-800">Kehamilan:</strong> <span class="text-gray-500">Pasti UNFIT bagi wanita.</span></div></li>
+                        <li class="flex items-start bg-bglight p-3 rounded-xl border border-gray-100"><i class="fa-solid fa-virus text-red-400 mt-1 mr-3 text-lg"></i> <div><strong class="text-gray-800">Hepatitis B & TBC:</strong> <span class="text-gray-500">Aturan ketat Depnaker Taiwan.</span></div></li>
+                        <li class="flex items-start bg-bglight p-3 rounded-xl border border-gray-100"><i class="fa-solid fa-pills text-red-400 mt-1 mr-3 text-lg"></i> <div><strong class="text-gray-800">Narkoba & Adiktif:</strong> <span class="text-gray-500">Pasti gagal di Lab.</span></div></li>
+                        <li class="flex items-start bg-bglight p-3 rounded-xl border border-gray-100"><i class="fa-solid fa-brain text-red-400 mt-1 mr-3 text-lg"></i> <div><strong class="text-gray-800">Uji Psikotes:</strong> <span class="text-gray-500">Skizofrenia & Gangguan mental.</span></div></li>
+                    </ul>`;
+            }
+            updateStats();
+        }
+        
+        function updateStats() {
+            const reqs = state.requests;
+            document.getElementById('stat-total-req').innerText = reqs.length;
+            document.getElementById('stat-total-mcu').innerText = reqs.filter(r => r.hasil !== 'BELUM').length;
+            document.getElementById('stat-jp').innerText = reqs.filter(r => r.target === 'jepang').length;
+            document.getElementById('stat-tw').innerText = reqs.filter(r => r.target === 'taiwan').length;
+            document.getElementById('stat-fit').innerText = reqs.filter(r => r.hasil === 'FIT').length;
+            document.getElementById('stat-fwn').innerText = reqs.filter(r => r.hasil === 'FIT WITH NOTE').length;
+            document.getElementById('stat-unfit').innerText = reqs.filter(r => r.hasil === 'UNFIT').length;
+        }
+
+        function hitungBMI() {
+            const t = parseFloat(document.getElementById('bmi-tinggi').value)/100, b = parseFloat(document.getElementById('bmi-berat').value);
+            if(!t || !b) return showAlert("Perhatian", "Mohon isi angka Tinggi & Berat Badan dengan benar!");
+            
+            const bmi = (b/(t*t)).toFixed(1);
+            let status = ''; let color = ''; let saran = '';
+
+            if(bmi < 18.5) { 
+                status = "Underweight (Kurus)"; color = "text-yellow-600"; 
+                saran = "Tambah kalori berkualitas (telur, ayam, susu) & olahraga beban ringan."; 
+            }
+            else if(bmi >= 18.5 && bmi < 25) { 
+                status = "Normal (Ideal)"; color = "text-green-600"; 
+                saran = "Sempurna! Pertahankan dengan olahraga teratur."; 
+            }
+            else if(bmi >= 25 && bmi < 30) { 
+                status = "Overweight (Berlebih)"; color = "text-orange-500"; 
+                saran = "Kurangi karbohidrat kosong & gula. Rutinkan jogging/kardio."; 
+            }
+            else { 
+                status = "Obese (Obesitas)"; color = "text-red-600"; 
+                saran = "Defisit kalori wajib & hentikan makanan manis/berminyak segera!"; 
+            }
+
+            const resBox = document.getElementById('bmi-result');
+            resBox.classList.remove('hidden');
+            resBox.innerHTML = `
+                <div class="flex items-center gap-6">
+                    <div class="w-24 h-24 rounded-full border-4 border-gray-100 flex items-center justify-center flex-col shadow-sm">
+                        <span class="text-3xl font-black ${color} tracking-tighter leading-none">${bmi}</span>
+                    </div>
+                    <div>
+                        <div class="font-extrabold text-xl mb-1 ${color} tracking-tight">${status}</div>
+                        <div class="text-xs text-gray-500 leading-relaxed max-w-[200px]"><i class="fa-solid fa-prescription-bottle-medical mr-1"></i>${saran}</div>
+                    </div>
                 </div>
             `;
-            chatHistoryContainer.appendChild(div);
-            chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
-            return id;
         }
 
-        function removeLoading(id) {
-            const el = document.getElementById(id);
-            if (el) el.remove();
+        const urinData = {
+            'bening': { title: 'Bening', desc: 'Over-hidrasi. Kurangi sedikit air agar elektrolit seimbang.', color: 'text-gray-500' },
+            'kuning_normal': { title: 'Kuning Jernih', desc: 'Kondisi Ginjal Prima. Pertahankan hidrasi ini.', color: 'text-green-600' },
+            'kuning_pucat': { title: 'Kuning Pucat', desc: 'Sangat Sehat. Standard medical check-up.', color: 'text-green-500' },
+            'kuning_tua': { title: 'Kuning Pekat', desc: 'Kurang Air. Minum 2 gelas air putih sekarang.', color: 'text-yellow-600' },
+            'kuning_kecoklatan': { title: 'Kecoklatan', desc: 'Dehidrasi level sedang. Fungsi ginjal dipaksa bekerja keras.', color: 'text-orange-600' },
+            'orange': { title: 'Oranye', desc: 'Pengaruh obat / dehidrasi akut. Gagal tes urin.', color: 'text-red-500' },
+            'merah': { title: 'Merah (Darah)', desc: 'Indikasi batu ginjal / infeksi saluran kemih (ISK).', color: 'text-red-600' },
+            'coklat': { title: 'Cokelat Gelap', desc: 'Kerusakan liver (Hati) serius / dehidrasi mematikan.', color: 'text-red-800' }
+        };
+
+        function cekUrin(type) {
+            const data = urinData[type];
+            const resBox = document.getElementById('urin-result');
+
+            resBox.classList.remove('hidden');
+            let peringatanHtml = '';
+
+            if(['kuning_kecoklatan', 'orange', 'merah', 'coklat'].includes(type)) {
+                peringatanHtml = `
+                <div class="mt-4 flex bg-red-50 p-3 rounded-xl border border-red-100">
+                    <i class="fa-solid fa-triangle-exclamation text-red-500 text-xl mr-3 mt-0.5"></i>
+                    <span class="text-xs font-bold text-red-800 leading-tight">Warna ini dapat menyebabkan UNFIT medical. Jika berlangsung lama, konsultasikan ke Poli Penyakit Dalam.</span>
+                </div>`;
+            }
+
+            resBox.innerHTML = `
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-3 h-3 rounded-full bg-current ${data.color}"></div>
+                    <h4 class="font-extrabold text-lg tracking-tight text-gray-800">${data.title}</h4>
+                </div>
+                <p class="text-gray-500 font-medium text-sm leading-relaxed">${data.desc}</p>
+                ${peringatanHtml}
+            `;
         }
 
-        // Fungsi fetch utama ke Gemini dengan Retry-Backoff System
-        async function callGeminiAPI(prompt) {
-            // API Key disediakan oleh runtime environment, tidak perlu divalidasi
-            const apiKey = ""; 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        async function generateNewsAI() {
+            const topicInput = document.getElementById('news-ai-prompt');
+            const topic = topicInput?.value.trim();
+            if(!topic) {
+                showAlert("Peringatan", "Ketikkan topik berita terlebih dahulu!");
+                return;
+            }
+
+            const btn = document.getElementById('btn-news-ai');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
+            btn.disabled = true;
+
+            const prompt = `Buatkan 1 judul berita headline yang sangat menarik (clickbait yang positif/edukatif) dan 1 deskripsi singkat (maksimal 20 kata) tentang topik berikut: "${topic}". Berita ini ditujukan untuk siswa LPK Yonasindo yang akan berangkat kerja magang/tokutei ginou ke Jepang atau Taiwan. Jangan sertakan tag markdown JSON. Kembalikan HANYA format JSON valid dengan key "title" dan "desc".`;
+
+            const res = await fetchAPI('askAI', { prompt: prompt, systemInstruction: "", useJSON: true });
+
+            if(res.status === 'success' && res.data && res.data.title && res.data.desc) {
+                document.getElementById('news-title').value = res.data.title;
+                document.getElementById('news-desc').value = res.data.desc;
+            } else {
+                showAlert("Error AI", "Gagal merumuskan berita. Pastikan backend sudah terkonfigurasi dengan kunci API.");
+            }
+
+            btn.innerHTML = `Buat ✨`;
+            btn.disabled = false;
+        }
+
+        function renderNews(isAdmin) {
+            const cont = document.getElementById('news-container');
+            if (!cont) return;
+            cont.innerHTML = state.news.length ? '' : '<div class="text-center py-8"><i class="fa-regular fa-newspaper text-3xl text-gray-200 mb-2 block"></i><p class="text-xs font-bold text-gray-400">Belum ada pengumuman.</p></div>';
             
-            // System instruction spesifik untuk membatasi AI sebagai asisten medis MCU
-            const systemPrompt = "Anda adalah asisten medis virtual yang ramah dan membantu untuk siswa-siswa di LPK Yonasindo Intra Pratama. Jawablah pertanyaan seputar persiapan Medical Checkup (MCU) seperti: apakah perlu puasa, pantangan makanan sebelum cek, dokumen yang dibawa, dan tips gaya hidup sehat agar lulus MCU. Gunakan bahasa Indonesia yang santai, memotivasi, tapi tetap profesional. Jika siswa bertanya hal yang terlalu detail mengenai penyakit atau resep obat, beri tahu mereka bahwa Anda hanya Asisten Persiapan MCU dan sarankan untuk konsultasi langsung ke klinik.";
-            
-            let retries = 5;
-            let delay = 1000;
-            
-            while (retries > 0) {
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: prompt }] }],
-                            systemInstruction: { parts: [{ text: systemPrompt }] }
-                        })
-                    });
+            state.news.forEach(n => {
+                cont.innerHTML += `<div class="group border border-gray-100 bg-white p-4 mb-4 rounded-2xl shadow-sm hover:shadow-md transition-all relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-secondary"></div>
+                    <h3 class="font-extrabold text-gray-800 text-base tracking-tight mb-1 pr-4">${n.title}</h3>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2"><i class="fa-regular fa-clock mr-1"></i> ${formatTglIndo(n.date)}</p>
+                    <p class="text-sm text-gray-600 mb-3 font-medium leading-relaxed">${n.desc}</p>
                     
-                    if (!response.ok) throw new Error(`API Error: ${response.status}`);
-                    
-                    const data = await response.json();
-                    return data.candidates[0].content.parts[0].text;
-                } catch (error) {
-                    retries--;
-                    if (retries === 0) throw error;
-                    await new Promise(res => setTimeout(res, delay));
-                    delay *= 2; // Exponential backoff (1s, 2s, 4s, 8s, 16s)
+                    <div class="flex justify-between items-center border-t border-gray-50 pt-3">
+                        <a href="${n.link}" target="_blank" class="text-primary text-xs font-bold hover:underline group-hover:text-secondary transition-colors">Telusuri <i class="fa-solid fa-arrow-right text-[10px] ml-1"></i></a>
+                        ${isAdmin ? `<button onclick="editNews(${n.id})" class="text-blue-500 bg-blue-50 px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-blue-100 transition-colors"><i class="fa-solid fa-pen mr-1"></i> Edit</button>` : ''}
+                    </div>
+                </div>`;
+            });
+        }
+
+        async function saveNews() {
+            const payload = { 
+                id: document.getElementById('news-id').value || Date.now(), 
+                title: document.getElementById('news-title').value, 
+                desc: document.getElementById('news-desc').value, 
+                link: document.getElementById('news-link').value, 
+                date: toYYYYMMDD(new Date()) 
+            };
+            document.getElementById('loader').style.display = 'flex';
+            document.getElementById('loader-text').innerHTML = "MENYIMPAN BERITA...<br><span class='text-[10px] font-medium text-gray-500 tracking-normal mt-2 block'>(Mohon tunggu sebentar)</span>";
+            
+            const res = await fetchAPI('saveNews', payload);
+            if(res.status === 'success') {
+                closeModal('modal-add-news');
+                await refreshDataAndUI("Berita berhasil dipublikasikan!");
+            } else {
+                document.getElementById('loader').style.display = 'none';
+                showAlert("Error", "Gagal menyimpan berita.");
+            }
+        }
+
+        function editNews(id) {
+            const n = state.news.find(x => x.id == id);
+            if(n) {
+                document.getElementById('news-id').value = n.id;
+                document.getElementById('news-title').value = n.title;
+                document.getElementById('news-desc').value = n.desc;
+                document.getElementById('news-link').value = n.link || '';
+                openModal('modal-add-news');
+            }
+        }
+
+        // --- PENGAJUAN ---
+        function setupPengajuan() {
+            document.getElementById('pengajuan-nama').value = state.currentUser.nama;
+            document.getElementById('pengajuan-hp').value = state.currentUser.hp;
+            state.currentUser.role === 'siswa_jepang' ? document.getElementById('pengajuan-jepang-fields').classList.remove('hidden') : document.getElementById('pengajuan-jepang-fields').classList.add('hidden');
+        }
+        function validateKumiai(input) { if(/[^\x00-\x7F]/.test(input.value)) document.getElementById('err-kumiai').classList.remove('hidden'); else document.getElementById('err-kumiai').classList.add('hidden'); }
+        
+        function switchTab(t, b) {
+            document.getElementById('tab-form-pengajuan').classList.add('hidden');
+            document.getElementById('tab-riwayat-pengajuan').classList.add('hidden');
+            document.getElementById(t).classList.remove('hidden');
+            
+            if (b) {
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('text-white', 'bg-primary', 'shadow-md');
+                    btn.classList.add('text-gray-500', 'hover:bg-white/50');
+                });
+                b.classList.remove('text-gray-500', 'hover:bg-white/50');
+                b.classList.add('text-white', 'bg-primary', 'shadow-md');
+            }
+            if(t === 'tab-riwayat-pengajuan') renderRiwayatPengajuan();
+        }
+
+        function submitPengajuan(e) {
+            e.preventDefault();
+            if(state.currentUser.role === 'siswa_jepang') openModal('modal-syarat-jepang');
+            else { showAlert("Administrasi", "Proses Taiwan membutuhkan Psikotes fisik senilai Rp 200.000."); processSubmitTW(); }
+        }
+        async function processSubmitJP() {
+            if(!document.getElementById('chk-paham-jp').checked) return showAlert("Peringatan", "Harap centang konfirmasi pemahaman aturan terlebih dahulu!");
+            await saveRequest(document.getElementById('pengajuan-alamat').value, document.getElementById('pengajuan-kumiai').value, document.getElementById('pengajuan-jenis').value);
+            closeModal('modal-syarat-jepang');
+        }
+        async function processSubmitTW() { await saveRequest('-', '-', 'MCU TAIWAN'); }
+        async function saveRequest(a, k, j) {
+            const editId = document.getElementById('edit-pengajuan-id').value;
+            const id = editId || Date.now();
+            let payload = { 
+                id, userId: state.currentUser.id, nama: state.currentUser.nama, hp: state.currentUser.hp, 
+                target: state.currentUser.target, alamat: a, kumiai: k, jenis: j, 
+                tglLahir: document.getElementById('pengajuan-tgl-lahir').value, 
+                tglReq: toYYYYMMDD(new Date()), tglEst: '', status: 'Menunggu persetujuan', 
+                hasil: 'BELUM', catatan: '' 
+            };
+
+            if (editId) {
+                const existing = state.requests.find(r => r.id == editId);
+                if (existing) {
+                    payload.tglReq = existing.tglReq;
+                    payload.tglEst = existing.tglEst;
+                    payload.status = existing.status;
+                    payload.hasil = existing.hasil;
+                    payload.catatan = existing.catatan;
+                    if(existing.pdfLink) payload.pdfLink = existing.pdfLink;
                 }
             }
+
+            const res = await fetchAPI('saveRequest', payload);
+            if(res.status === 'success') {
+                if (editId) {
+                    const idx = state.requests.findIndex(r => r.id == editId);
+                    if (idx > -1) state.requests[idx] = payload;
+                    showAlert("Pembaruan Sukses", "Dokumen formulir Anda berhasil direvisi dalam sistem.");
+                } else {
+                    state.requests.push(payload);
+                    showAlert("Pengiriman Berhasil", "Berkas permohonan medical telah masuk ke antrean administrator.");
+                }
+                cancelEdit(); 
+                switchTab('tab-riwayat-pengajuan', document.querySelectorAll('.tab-btn')[1]);
+                updateStats();
+            }
+        }
+        
+        function renderRiwayatPengajuan() {
+            const my = state.requests.filter(r => r.userId == state.currentUser.id);
+            const cont = document.getElementById('riwayat-content');
+            cont.innerHTML = my.length ? '' : '<div class="text-center py-16 bg-bglight rounded-3xl border border-gray-100"><i class="fa-regular fa-folder-open text-5xl text-gray-300 mb-4 block"></i><h3 class="text-xl font-extrabold text-gray-500 tracking-tight">KOSONG</h3><p class="text-sm font-medium text-gray-400 mt-1">Anda belum membuat permohonan medical.</p></div>';
+            
+            my.forEach(r => {
+                let badgeStatus = 'bg-yellow-50 text-yellow-600 border-yellow-200';
+                let iconStatus = 'fa-clock';
+                if(r.status === 'Disetujui') {
+                    badgeStatus = 'bg-green-50 text-green-600 border-green-200';
+                    iconStatus = 'fa-check-circle';
+                }
+
+                cont.innerHTML += `
+                <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-lg transition-all">
+                    <div class="flex justify-between items-start mb-4 border-b border-gray-50 pb-4">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1 block">Tipe Layanan</span>
+                            <h3 class="font-extrabold text-xl text-primary tracking-tight">${r.jenis}</h3>
+                        </div>
+                        <div class="px-3 py-1.5 rounded-xl border ${badgeStatus} flex items-center shadow-sm">
+                            <i class="fa-solid ${iconStatus} text-sm mr-2"></i>
+                            <span class="text-[11px] font-bold uppercase tracking-wider">${r.status}</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-5 bg-bglight p-4 rounded-2xl border border-gray-100">
+                        <div>
+                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1"><i class="fa-solid fa-calendar-plus mr-1"></i> Tgl Dibuat</p>
+                            <p class="text-sm font-bold text-gray-800">${formatTglIndo(r.tglReq)}</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1"><i class="fa-solid fa-calendar-check mr-1"></i> Estimasi MCU</p>
+                            <p class="text-sm font-extrabold text-primary">${r.tglEst ? formatTglIndo(r.tglEst) : '<span class="text-gray-400 font-medium italic">Menunggu...</span>'}</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 justify-end pt-2">
+                        ${r.status === 'Menunggu persetujuan' ? `<button onclick="editPengajuan(${r.id})" class="bg-white text-blue-600 border border-blue-200 px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-blue-50 transition-colors shadow-sm"><i class="fa-solid fa-pen mr-1"></i> Ubah Data</button>` : ''}
+                        <button onclick="batalPengajuan(${r.id})" class="bg-red-50 text-red-600 border border-red-100 px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-red-100 transition-colors shadow-sm"><i class="fa-solid fa-xmark mr-1"></i> Tarik / Batal</button>
+                    </div>
+                </div>`;
+            });
+        }
+        function batalPengajuan(id) {
+            confirmAction("Dokumen pengajuan Anda akan ditarik dan dihapus dari sistem. Anda yakin?", async () => {
+                const res = await fetchAPI('deleteRequest', { id: id });
+                if(res.status === 'success') {
+                    state.requests = state.requests.filter(r => r.id !== id);
+                    renderRiwayatPengajuan();
+                    updateStats();
+                    showAlert("Operasi Selesai", "Pengajuan berhasil dihapus secara permanen.");
+                }
+            });
+        }
+        function editPengajuan(id) {
+            const r = state.requests.find(x => x.id == id);
+            document.getElementById('edit-pengajuan-id').value = r.id;
+            document.getElementById('pengajuan-tgl-lahir').value = r.tglLahir;
+            if(state.currentUser.role === 'siswa_jepang') {
+                document.getElementById('pengajuan-alamat').value = r.alamat;
+                document.getElementById('pengajuan-kumiai').value = r.kumiai;
+                document.getElementById('pengajuan-jenis').value = r.jenis;
+            }
+            document.getElementById('form-pengajuan-title').innerText = "Pembaruan Dokumen Pengajuan";
+            document.getElementById('btn-submit-pengajuan').innerText = "Simpan Perubahan";
+            document.getElementById('btn-cancel-edit').classList.remove('hidden');
+            switchTab('tab-form-pengajuan', document.querySelectorAll('.tab-btn')[0]);
+        }
+        function cancelEdit() { 
+            document.getElementById('form-mcu').reset(); 
+            document.getElementById('edit-pengajuan-id').value = ""; 
+            document.getElementById('form-pengajuan-title').innerText = "Formulir Pengajuan Medical";
+            document.getElementById('btn-submit-pengajuan').innerText = "Submit Pengajuan";
+            document.getElementById('btn-cancel-edit').classList.add('hidden');
+            setupPengajuan(); 
+        }
+
+        // --- ADMIN KELOLA ---
+        function renderKelolaPengajuan() {
+            const container = document.getElementById('kelola-pengajuan-container');
+            const paginationContainer = document.getElementById('pagination-kelola-container');
+            container.innerHTML = '';
+            
+            if(state.requests.length === 0) {
+                container.innerHTML = '<div class="col-span-1 md:col-span-2 text-center py-16 bg-bglight rounded-[2rem] border border-gray-100"><i class="fa-solid fa-inbox text-5xl text-gray-300 mb-4 block"></i><p class="text-lg font-bold text-gray-500">Inbox administrasi kosong.</p></div>';
+                paginationContainer.innerHTML = '';
+                return;
+            }
+            
+            let data = [...state.requests].reverse();
+            
+            const totalPages = Math.ceil(data.length / itemsPerPage);
+            if (currentKelolaPage > totalPages) currentKelolaPage = totalPages;
+            
+            const startIndex = (currentKelolaPage - 1) * itemsPerPage;
+            const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
+
+            paginatedData.forEach(r => {
+                const statusColor = r.status === 'Disetujui' ? 'text-green-700 bg-green-50 border-green-200' : 'text-yellow-700 bg-yellow-50 border-yellow-200';
+                container.innerHTML += `
+                    <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-xl transition-all group relative overflow-hidden">
+                        <div class="absolute right-0 top-0 w-24 h-24 bg-primary/5 rounded-bl-full pointer-events-none transition-transform group-hover:scale-110"></div>
+                        <div class="flex justify-between items-start border-b border-gray-50 pb-4 mb-4 relative z-10">
+                            <div>
+                                <h4 class="font-extrabold text-gray-800 text-lg tracking-tight leading-tight">${r.nama}</h4>
+                                <p class="text-[11px] text-gray-500 mt-1 font-bold"><i class="fa-solid fa-phone mr-1 text-gray-400"></i> ${r.hp}</p>
+                            </div>
+                            <span class="text-[9px] font-black px-3 py-1.5 rounded-full uppercase ${r.target === 'jepang' ? 'bg-red-50 text-red-600 border-red-100' : 'bg-blue-50 text-blue-600 border-blue-100'} border shadow-sm">${r.target}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 text-xs mb-5 relative z-10">
+                            <div class="bg-bglight p-3 rounded-xl border border-gray-100">
+                                <p class="text-gray-400 mb-1 text-[9px] uppercase font-bold tracking-widest"><i class="fa-solid fa-briefcase-medical mr-1"></i> Protokol</p>
+                                <p class="font-extrabold text-primary">${r.jenis} <br><span class="text-gray-500 font-medium text-[10px] mt-0.5 block">${r.kumiai || 'Tidak Ada'}</span></p>
+                            </div>
+                            <div class="bg-bglight p-3 rounded-xl border border-gray-100">
+                                <p class="text-gray-400 mb-1 text-[9px] uppercase font-bold tracking-widest"><i class="fa-regular fa-calendar-days mr-1"></i> Jadwal</p>
+                                <p class="font-medium text-gray-600 mb-1"><span class="text-[10px]">Req:</span> ${formatTglIndo(r.tglReq)}</p>
+                                <p class="font-extrabold text-primary leading-tight"><span class="text-[10px] font-medium text-gray-600">Est:</span> ${formatTglIndo(r.tglEst) || 'TBA'}</p>
+                            </div>
+                        </div>
+                        <div class="pt-3 flex justify-between items-center relative z-10">
+                            <span class="font-black text-[10px] px-3 py-1.5 rounded-xl border uppercase tracking-wider shadow-sm ${statusColor}">${r.status}</span>
+                            <div class="flex gap-2">
+                                <button onclick="editKelola(${r.id})" class="bg-white text-blue-600 border border-blue-200 w-10 h-10 rounded-xl hover:bg-blue-50 transition-colors shadow-sm flex items-center justify-center" title="Validasi"><i class="fa-solid fa-check-double text-lg"></i></button>
+                                <button onclick="hapusPengajuan(${r.id})" class="bg-white text-red-500 border border-red-100 w-10 h-10 rounded-xl hover:bg-red-50 transition-colors shadow-sm flex items-center justify-center" title="Hapus"><i class="fa-solid fa-trash-can text-lg"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            renderKelolaPaginationControls(totalPages);
+        }
+        
+        function renderKelolaPaginationControls(totalPages) {
+            const paginationContainer = document.getElementById('pagination-kelola-container');
+            if (totalPages <= 1) {
+                paginationContainer.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            html += `<button onclick="changeKelolaPage(${currentKelolaPage - 1})" class="w-10 h-10 rounded-2xl bg-white border border-gray-200 text-gray-500 hover:text-primary hover:border-primary transition-all shadow-sm flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed transform hover:-translate-y-0.5" ${currentKelolaPage === 1 ? 'disabled' : ''}><i class="fa-solid fa-chevron-left"></i></button>`;
+
+            let startPage = Math.max(1, currentKelolaPage - 2);
+            let endPage = Math.min(totalPages, currentKelolaPage + 2);
+
+            if (startPage > 1) {
+                html += `<button onclick="changeKelolaPage(1)" class="w-10 h-10 rounded-2xl bg-white border border-gray-200 text-gray-500 hover:text-primary hover:border-primary font-bold transition-all shadow-sm flex items-center justify-center transform hover:-translate-y-0.5">1</button>`;
+                if (startPage > 2) html += `<span class="px-2 text-gray-400 font-bold tracking-widest">...</span>`;
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                if (i === currentKelolaPage) {
+                    html += `<button class="w-10 h-10 rounded-2xl bg-primary text-white font-extrabold shadow-md flex items-center justify-center transform scale-110">${i}</button>`;
+                } else {
+                    html += `<button onclick="changeKelolaPage(${i})" class="w-10 h-10 rounded-2xl bg-white border border-gray-200 text-gray-500 hover:text-primary hover:border-primary font-bold transition-all shadow-sm flex items-center justify-center transform hover:-translate-y-0.5">${i}</button>`;
+                }
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) html += `<span class="px-2 text-gray-400 font-bold tracking-widest">...</span>`;
+                html += `<button onclick="changeKelolaPage(${totalPages})" class="w-10 h-10 rounded-2xl bg-white border border-gray-200 text-gray-500 hover:text-primary hover:border-primary font-bold transition-all shadow-sm flex items-center justify-center transform hover:-translate-y-0.5">${totalPages}</button>`;
+            }
+
+            html += `<button onclick="changeKelolaPage(${currentKelolaPage + 1})" class="w-10 h-10 rounded-2xl bg-white border border-gray-200 text-gray-500 hover:text-primary hover:border-primary transition-all shadow-sm flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed transform hover:-translate-y-0.5" ${currentKelolaPage === totalPages ? 'disabled' : ''}><i class="fa-solid fa-chevron-right"></i></button>`;
+
+            paginationContainer.innerHTML = html;
+        }
+
+        function changeKelolaPage(page) {
+            currentKelolaPage = page;
+            renderKelolaPengajuan();
+            document.getElementById('view-kelola-pengajuan').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function editKelola(id) {
+            const r = state.requests.find(x => x.id == id);
+            document.getElementById('admin-kelola-id').value = r.id;
+            document.getElementById('admin-kelola-status').value = r.status;
+            document.getElementById('admin-kelola-tgl').value = r.tglEst;
+            openModal('modal-admin-pengajuan');
+        }
+        function hapusPengajuan(id) {
+            confirmAction("Data pengajuan ini akan dihapus secara permanen dari sistem. Anda yakin?", async () => {
+                const res = await fetchAPI('deleteRequest', { id: id });
+                if(res.status === 'success') {
+                    await refreshDataAndUI("Pengajuan berhasil dihapus dari sistem.");
+                }
+            });
+        }
+        async function saveAdminKelola() {
+            const r = state.requests.find(x => x.id == document.getElementById('admin-kelola-id').value);
+            r.status = document.getElementById('admin-kelola-status').value;
+            r.tglEst = document.getElementById('admin-kelola-tgl').value;
+            await fetchAPI('saveRequest', r); 
+            await refreshDataAndUI("Status pengajuan berhasil diperbarui!");
+        }
+
+        // --- HASIL & UPLOAD PDF ---
+        function switchTabHasil(t, b) {
+            document.getElementById('tab-hasil-saya').classList.add('hidden');
+            document.getElementById('tab-data-medical').classList.add('hidden');
+            document.getElementById(t).classList.remove('hidden');
+            
+            if (b) {
+                document.querySelectorAll('.tab-hasil-btn').forEach(btn => {
+                    btn.classList.remove('text-white', 'bg-primary', 'shadow-md');
+                    btn.classList.add('text-gray-500', 'hover:bg-white/50');
+                });
+                b.classList.remove('text-gray-500', 'hover:bg-white/50');
+                b.classList.add('text-white', 'bg-primary', 'shadow-md');
+            }
+            
+            if(t === 'tab-hasil-saya') {
+                renderHasilSaya();
+                clearBulkSelection(); 
+            } else {
+                renderDataMedical();
+            }
+        }
+
+        function renderHasilMedical() {
+            if(state.currentUser.role === 'admin' || state.currentUser.role === 'staff') {
+                document.getElementById('hasil-tabs-container').classList.add('hidden');
+                document.getElementById('tab-hasil-saya').classList.add('hidden');
+                document.getElementById('tab-data-medical').classList.remove('hidden');
+                renderDataMedical();
+            } else {
+                document.getElementById('hasil-tabs-container').classList.remove('hidden');
+                switchTabHasil('tab-hasil-saya', document.querySelectorAll('.tab-hasil-btn')[0]);
+            }
+        }
+
+        function renderHasilSaya() {
+            const my = state.requests.filter(r => r.userId == state.currentUser.id && r.hasil !== 'BELUM');
+            const cont = document.getElementById('hasil-saya-content');
+            cont.innerHTML = my.length ? '' : '<div class="text-center py-12 bg-bglight rounded-3xl border border-gray-100"><i class="fa-solid fa-file-shield text-5xl text-gray-300 mb-4 block"></i><h3 class="text-xl font-extrabold text-gray-500 tracking-tight">KOSONG</h3><p class="text-sm font-medium text-gray-400 mt-1">Sertifikat medis belum terbit.</p></div>';
+            
+            my.forEach(r => {
+                let color = 'text-green-700 bg-green-50 border-green-200';
+                let icon = 'fa-check-circle';
+                if(r.hasil === 'UNFIT') { color = 'text-red-700 bg-red-50 border-red-200'; icon = 'fa-xmark-circle'; }
+                else if(r.hasil === 'FIT WITH NOTE') { color = 'text-yellow-700 bg-yellow-50 border-yellow-200'; icon = 'fa-exclamation-circle'; }
+                else if(r.hasil === 'SUDAH MCU, MENUNGGU HASIL') { color = 'text-blue-700 bg-blue-50 border-blue-200'; icon = 'fa-clock-rotate-left'; }
+
+                const pdfBtn = r.pdfLink ? `
+                    <a href="${r.pdfLink}" target="_blank" download class="mt-5 flex items-center justify-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-3.5 rounded-xl text-sm font-extrabold transition-all shadow-[0_8px_20px_rgba(239,68,68,0.2)] transform hover:-translate-y-1">
+                        <i class="fa-solid fa-file-pdf text-lg"></i> Unduh / Lihat Hasil PDF
+                    </a>` : `
+                    <div class="mt-5 flex items-center justify-center gap-2 bg-gray-100 text-gray-400 border border-gray-200 py-3.5 rounded-xl text-sm font-extrabold cursor-not-allowed">
+                        <i class="fa-solid fa-file-pdf text-lg"></i> Hasil PDF Belum Tersedia
+                    </div>`;
+
+                let catatanHtml = '';
+                if(r.catatan) {
+                    catatanHtml = `
+                    <div class="mt-4 text-sm bg-blue-50/50 border border-blue-100 p-4 rounded-2xl text-gray-700 leading-relaxed shadow-sm">
+                        <strong class="text-blue-800 block mb-1 font-extrabold"><i class="fa-solid fa-user-doctor mr-1"></i> Catatan Dokter:</strong>
+                        ${r.catatan.replace(/\n/g, '<br>')}
+                    </div>`;
+                }
+
+                cont.innerHTML += `<div class="bg-white p-8 border border-gray-100 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-left mb-6 relative overflow-hidden group">
+                    <div class="absolute left-0 top-0 bottom-0 w-2 ${r.hasil==='FIT'?'bg-green-500':r.hasil==='UNFIT'?'bg-red-500':r.hasil==='FIT WITH NOTE'?'bg-yellow-400':'bg-blue-400'}"></div>
+                    <div class="pl-4">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1 block"><i class="fa-solid fa-stethoscope mr-1"></i> Evaluasi Medis</span>
+                        <p class="font-extrabold text-gray-800 text-2xl mb-2 tracking-tight">${r.jenis}</p>
+                        <p class="text-xs text-gray-500 font-medium mb-5"><i class="fa-regular fa-calendar mr-1"></i> Pelaksanaan: ${formatTglIndo(r.tglEst)}</p>
+                        
+                        <div class="mb-4 bg-bglight p-4 rounded-2xl border border-gray-100">
+                            <span class="text-[10px] text-gray-500 uppercase font-bold tracking-widest block mb-2">Keputusan Akhir Klinik</span>
+                            <span class="font-black text-sm px-4 py-2 rounded-xl border flex items-center w-max shadow-sm ${color}"><i class="fa-solid ${icon} mr-2 text-lg"></i> ${r.hasil}</span>
+                        </div>
+                        
+                        ${catatanHtml}
+                        
+                        ${pdfBtn}
+                    </div>
+                </div>`;
+            });
+        }
+
+        // LOGIKA BULK EDIT & CHECKBOX
+        function handleCheckboxChange(checkbox) {
+            const id = checkbox.value;
+            if(checkbox.checked) {
+                if(!selectedBulkIds.includes(id)) selectedBulkIds.push(id);
+            } else {
+                selectedBulkIds = selectedBulkIds.filter(item => item !== id);
+            }
+            updateBulkActionBar();
+        }
+
+        function updateBulkActionBar() {
+            const bar = document.getElementById('bulk-action-bar');
+            const count = document.getElementById('bulk-count');
+            
+            if(selectedBulkIds.length > 0) {
+                count.innerText = selectedBulkIds.length;
+                bar.classList.remove('translate-y-32', 'opacity-0', 'pointer-events-none');
+            } else {
+                bar.classList.add('translate-y-32', 'opacity-0', 'pointer-events-none');
+            }
+        }
+
+        function clearBulkSelection() {
+            selectedBulkIds = [];
+            document.querySelectorAll('.bulk-checkbox').forEach(cb => cb.checked = false);
+            updateBulkActionBar();
+        }
+
+        function editStatus(id) {
+            document.getElementById('admin-status-ids').value = JSON.stringify([id]);
+            const r = state.requests.find(x => x.id == id);
+            document.getElementById('admin-status-value').value = r.hasil;
+            document.getElementById('admin-status-catatan').value = r.catatan || '';
+            document.getElementById('bulk-warning-msg').classList.add('hidden');
+            openModal('modal-admin-status');
+        }
+
+        function editBulkStatus() {
+            document.getElementById('admin-status-ids').value = JSON.stringify(selectedBulkIds);
+            document.getElementById('admin-status-value').value = 'SUDAH MCU, MENUNGGU HASIL'; 
+            document.getElementById('admin-status-catatan').value = '';
+            document.getElementById('bulk-warning-msg').classList.remove('hidden');
+            openModal('modal-admin-status');
+        }
+
+        // FUNGSI HANDLE SEARCH UNTUK MERESET HALAMAN KE 1 SAAT MENCARI
+        function handleSearch() {
+            currentPage = 1;
+            renderDataMedical();
+        }
+
+        function renderDataMedical() {
+            const container = document.getElementById('data-medical-container');
+            const paginationContainer = document.getElementById('pagination-container');
+            container.innerHTML = '';
+            
+            const query = document.getElementById('search-mcu').value.toLowerCase();
+            const qDate = document.getElementById('search-date').value;
+            const role = state.currentUser.role;
+            
+            // Urutkan data terbaru di atas
+            let data = [...state.requests].reverse().filter(r => r.status === 'Disetujui');
+            
+            if(role === 'siswa_jepang') data = data.filter(r => r.target === 'jepang');
+            if(role === 'siswa_taiwan') data = data.filter(r => r.target === 'taiwan');
+            
+            if(query) data = data.filter(r => r.nama.toLowerCase().includes(query) || (r.kumiai && r.kumiai.toLowerCase().includes(query)) || r.jenis.toLowerCase().includes(query) || r.hasil.toLowerCase().includes(query));
+            if(qDate) data = data.filter(r => toYYYYMMDD(r.tglEst) === qDate);
+
+            if(data.length === 0) {
+                container.innerHTML = `<div class="col-span-1 md:col-span-2 text-center py-12 text-gray-400 font-bold bg-bglight rounded-[2rem] border border-gray-100"><i class="fa-solid fa-magnifying-glass text-3xl mb-3 block opacity-50"></i>Pencarian tidak menemukan hasil.</div>`;
+                paginationContainer.innerHTML = '';
+                return;
+            }
+
+            // LOGIKA PAGINATION (MEMOTONG DATA SESUAI HALAMAN)
+            const totalPages = Math.ceil(data.length / itemsPerPage);
+            if (currentPage > totalPages) currentPage = totalPages;
+            
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
+
+            paginatedData.forEach(r => {
+                const isMe = r.userId == state.currentUser.id;
+                const badgeMe = isMe ? `<span class="text-[9px] bg-primary text-white px-2 py-0.5 rounded-full ml-2 align-middle shadow-sm font-bold uppercase tracking-wider"><i class="fa-solid fa-user mr-0.5"></i> Saya</span>` : '';
+                
+                let resColor = 'text-yellow-700 bg-yellow-50 border-yellow-200';
+                if(r.hasil === 'FIT') resColor = 'text-green-700 bg-green-50 border-green-200';
+                else if(r.hasil === 'UNFIT') resColor = 'text-red-700 bg-red-50 border-red-200';
+                else if(r.hasil === 'SUDAH MCU, MENUNGGU HASIL') resColor = 'text-blue-700 bg-blue-50 border-blue-200';
+
+                const hpDisplay = (role === 'admin' || role === 'staff' || isMe) ? r.hp : `<span title="Enkripsi Keamanan" class="text-gray-400 font-bold tracking-widest px-2 py-0.5 bg-gray-100 rounded-md">***-****</span>`;
+                const hasilDisplay = (role === 'admin' || role === 'staff' || isMe) ? 
+                    `<span class="font-black text-[10px] px-3 py-1.5 rounded-xl border uppercase shadow-sm ${resColor}">${r.hasil}</span>` : 
+                    `<span title="Hak Akses Ditolak" class="text-gray-400 font-extrabold text-[10px] bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-xl shadow-sm"><i class="fa-solid fa-lock mr-1"></i> RAHASIA</span>`;
+                
+                const isChecked = selectedBulkIds.includes(r.id.toString()) ? 'checked' : '';
+                const checkboxHtml = role === 'admin' ? `
+                    <div class="absolute top-5 right-5 z-20">
+                        <input type="checkbox" class="w-6 h-6 rounded-md border-gray-300 text-primary focus:ring-primary cursor-pointer shadow-sm bulk-checkbox transition-all hover:scale-110" value="${r.id}" onchange="handleCheckboxChange(this)" ${isChecked}>
+                    </div>
+                ` : '';
+
+                let catatanHtml = '';
+                if ((role === 'admin' || role === 'staff' || isMe) && r.catatan) {
+                    catatanHtml = `
+                        <div class="mb-4 relative z-10 ${isMe ? 'pl-3' : ''}">
+                            <div class="bg-blue-50/50 border border-blue-100 p-3 rounded-xl shadow-sm">
+                                <p class="text-blue-800 text-[10px] font-extrabold mb-1"><i class="fa-solid fa-user-doctor mr-1"></i> Catatan Medis:</p>
+                                <p class="text-xs text-gray-700 leading-relaxed font-medium">${r.catatan.replace(/\n/g, '<br>')}</p>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                let statusDokumenHtml = '';
+                if(role === 'admin' || role === 'staff') {
+                    if(r.pdfLink) {
+                        statusDokumenHtml = `
+                            <div class="mb-4 relative z-10 ${isMe ? 'pl-3' : ''}">
+                                <p class="text-gray-400 mb-1.5 text-[9px] uppercase font-bold tracking-widest"><i class="fa-solid fa-file-pdf mr-1"></i> File Hasil Medical</p>
+                                <span class="bg-green-100 text-green-700 px-3 py-1.5 rounded-xl text-[10px] font-black border border-green-200 shadow-sm inline-flex items-center"><i class="fa-solid fa-check-circle mr-1.5"></i> Sudah mengunggah hasil</span>
+                            </div>
+                        `;
+                    } else {
+                        statusDokumenHtml = `
+                            <div class="mb-4 relative z-10 ${isMe ? 'pl-3' : ''}">
+                                <p class="text-gray-400 mb-1.5 text-[9px] uppercase font-bold tracking-widest"><i class="fa-solid fa-file-pdf mr-1"></i> File Hasil Medical</p>
+                                <span class="bg-red-50 text-red-500 px-3 py-1.5 rounded-xl text-[10px] font-black border border-red-100 shadow-sm inline-flex items-center"><i class="fa-solid fa-xmark-circle mr-1.5"></i> Belum Mengunggah Hasil</span>
+                            </div>
+                        `;
+                    }
+                }
+
+                let aksiHtml = '';
+                if(role === 'admin') {
+                    aksiHtml = `
+                        <div class="flex gap-2">
+                            <button class="bg-blue-50 text-blue-700 border border-blue-200 font-bold px-3 py-2 rounded-xl hover:bg-blue-100 transition shadow-sm text-[10px] transform hover:-translate-y-0.5" onclick="editStatus(${r.id})"><i class="fa-solid fa-notes-medical mr-1"></i> Status</button>
+                            <button class="bg-red-50 text-red-600 border border-red-200 font-bold px-3 py-2 rounded-xl hover:bg-red-100 transition shadow-sm text-[10px] transform hover:-translate-y-0.5" onclick="editPDF(${r.id})"><i class="fa-solid fa-file-pdf mr-1"></i> PDF</button>
+                        </div>
+                    `;
+                } else if(role === 'staff') {
+                    if(r.pdfLink) {
+                        aksiHtml = `<a href="${r.pdfLink}" target="_blank" title="Buka Sertifikat PDF" class="text-[10px] bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-xl font-bold transition shadow-sm inline-flex items-center transform hover:-translate-y-0.5"><i class="fa-solid fa-cloud-arrow-down mr-1 text-sm"></i> Lihat PDF</a>`;
+                    } else {
+                        aksiHtml = `<span class="text-[10px] text-gray-400 italic">PDF Belum Tersedia</span>`;
+                    }
+                } else if(r.pdfLink && isMe) {
+                    aksiHtml = `<a href="${r.pdfLink}" target="_blank" title="Buka Sertifikat PDF" class="text-[10px] bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-xl font-bold transition shadow-sm inline-flex items-center transform hover:-translate-y-0.5"><i class="fa-solid fa-cloud-arrow-down mr-1 text-sm"></i> Berkas PDF</a>`;
+                }
+
+                container.innerHTML += `
+                    <div class="bg-white border border-gray-100 rounded-[2rem] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-xl transition-all relative overflow-hidden group">
+                        ${isMe ? `<div class="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-primary to-secondary z-0"></div>` : ''}
+                        ${checkboxHtml}
+                        
+                        <div class="flex justify-between items-start border-b border-gray-50 pb-4 mb-4 relative z-10 ${isMe ? 'pl-3' : ''} ${role === 'admin' ? 'pr-8' : ''}">
+                            <div>
+                                <h4 class="font-extrabold text-gray-800 text-base flex items-center tracking-tight">${r.nama} ${badgeMe}</h4>
+                                ${role !== 'siswa_taiwan' ? `<p class="text-[10px] text-gray-400 mt-1.5 uppercase font-bold tracking-widest"><i class="fa-solid fa-building mr-1"></i> LPK/KUMIAI: <span class="font-extrabold text-gray-700">${r.kumiai || '-'}</span></p>` : ''}
+                            </div>
+                            <span class="text-[9px] font-black px-3 py-1.5 rounded-full bg-bglight text-primary border border-gray-200 text-right shrink-0 ml-2 shadow-sm">${r.jenis}</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 text-xs ${isMe ? 'pl-3' : ''} mb-4 relative z-10">
+                            <div class="bg-bglight p-3 rounded-xl border border-gray-100">
+                                <p class="text-gray-400 mb-1 text-[9px] uppercase font-bold tracking-widest"><i class="fa-solid fa-phone mr-1"></i> Kontak</p>
+                                <p class="font-extrabold text-gray-700">${hpDisplay}</p>
+                            </div>
+                            <div class="bg-bglight p-3 rounded-xl border border-gray-100">
+                                <p class="text-gray-400 mb-1 text-[9px] uppercase font-bold tracking-widest"><i class="fa-regular fa-calendar-check mr-1"></i> Tanggal</p>
+                                <p class="font-extrabold text-primary">${formatTglIndo(r.tglEst)}</p>
+                            </div>
+                        </div>
+
+                        ${catatanHtml}
+                        ${statusDokumenHtml}
+                        
+                        <div class="pt-4 border-t border-gray-50 flex justify-between items-center relative z-10 ${isMe ? 'pl-3' : ''}">
+                            <div class="flex items-center">
+                                ${hasilDisplay}
+                            </div>
+                            ${aksiHtml}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // RENDER TOMBOL PAGINATION
+            renderPaginationControls(totalPages);
+        }
+
+        // FUNGSI UNTUK MERENDER TOMBOL-TOMBOL HALAMAN (1, 2, 3...)
+        function renderPaginationControls(totalPages) {
+            const paginationContainer = document.getElementById('pagination-container');
+            if (totalPages <= 1) {
+                paginationContainer.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            
+            // Tombol "Sebelumnya"
+            html += `<button onclick="changePage(${currentPage - 1})" class="w-10 h-10 rounded-2xl bg-white border border-gray-200 text-gray-500 hover:text-primary hover:border-primary transition-all shadow-sm flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed transform hover:-translate-y-0.5" ${currentPage === 1 ? 'disabled' : ''}><i class="fa-solid fa-chevron-left"></i></button>`;
+
+            // Logika Titik-titik (...) jika halaman sangat banyak
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, currentPage + 2);
+
+            if (startPage > 1) {
+                html += `<button onclick="changePage(1)" class="w-10 h-10 rounded-2xl bg-white border border-gray-200 text-gray-500 hover:text-primary hover:border-primary font-bold transition-all shadow-sm flex items-center justify-center transform hover:-translate-y-0.5">1</button>`;
+                if (startPage > 2) html += `<span class="px-2 text-gray-400 font-bold tracking-widest">...</span>`;
+            }
+
+            // Loop Angka Halaman
+            for (let i = startPage; i <= endPage; i++) {
+                if (i === currentPage) {
+                    // Halaman Aktif (Warna Hijau Primary)
+                    html += `<button class="w-10 h-10 rounded-2xl bg-primary text-white font-extrabold shadow-md flex items-center justify-center transform scale-110">${i}</button>`;
+                } else {
+                    html += `<button onclick="changePage(${i})" class="w-10 h-10 rounded-2xl bg-white border border-gray-200 text-gray-500 hover:text-primary hover:border-primary font-bold transition-all shadow-sm flex items-center justify-center transform hover:-translate-y-0.5">${i}</button>`;
+                }
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) html += `<span class="px-2 text-gray-400 font-bold tracking-widest">...</span>`;
+                html += `<button onclick="changePage(${totalPages})" class="w-10 h-10 rounded-2xl bg-white border border-gray-200 text-gray-500 hover:text-primary hover:border-primary font-bold transition-all shadow-sm flex items-center justify-center transform hover:-translate-y-0.5">${totalPages}</button>`;
+            }
+
+            // Tombol "Selanjutnya"
+            html += `<button onclick="changePage(${currentPage + 1})" class="w-10 h-10 rounded-2xl bg-white border border-gray-200 text-gray-500 hover:text-primary hover:border-primary transition-all shadow-sm flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed transform hover:-translate-y-0.5" ${currentPage === totalPages ? 'disabled' : ''}><i class="fa-solid fa-chevron-right"></i></button>`;
+
+            paginationContainer.innerHTML = html;
+        }
+
+        // FUNGSI GANTI HALAMAN
+        function changePage(page) {
+            currentPage = page;
+            renderDataMedical();
+            // Scroll otomatis naik perlahan ke arah kotak pencarian agar user nyaman
+            document.getElementById('title-data-medical').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function editPDF(id) {
+            const r = state.requests.find(x => x.id == id);
+            document.getElementById('admin-pdf-id').value = id;
+            document.getElementById('pdf-student-name').innerText = `Nama Siswa: ${r.nama}`;
+            
+            hapusFilePDF();
+            deleteExistingPdf = false; 
+            
+            const existingArea = document.getElementById('existing-pdf-area-pdf');
+            const statusArea = document.getElementById('pdf-status-text');
+            const dropZoneLabel = document.getElementById('drop-zone-label');
+            
+            if(r.pdfLink) {
+                statusArea.innerHTML = `<span class="bg-green-100 text-green-700 px-3 py-1.5 rounded-xl text-xs font-black border border-green-200 shadow-sm flex items-center w-max"><i class="fa-solid fa-check-circle mr-1.5"></i> Sudah mengunggah hasil</span>`;
+                document.getElementById('existing-pdf-link-pdf').href = r.pdfLink;
+                existingArea.classList.remove('hidden');
+                dropZoneLabel.innerText = "Ganti Dokumen (Akan Menimpa File Lama)";
+            } else {
+                statusArea.innerHTML = `<span class="bg-red-50 text-red-500 px-3 py-1.5 rounded-xl text-xs font-black border border-red-100 shadow-sm flex items-center w-max"><i class="fa-solid fa-xmark-circle mr-1.5"></i> Belum Mengunggah Hasil</span>`;
+                existingArea.classList.add('hidden');
+                dropZoneLabel.innerText = "Unggah PDF Baru";
+            }
+            openModal('modal-admin-pdf');
+        }
+
+        document.getElementById('admin-hasil-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if(file) {
+                if(file.type !== "application/pdf") {
+                    showAlert("Format Ditolak", "Sistem keamanan hanya menerima ekstensi dokumen berformat PDF murni.");
+                    this.value = '';
+                    return;
+                }
+                if(file.size > 3 * 1024 * 1024) { 
+                    showAlert("Batas Ukuran", "Ukuran resolusi PDF terlalu besar. Maksimal pengunggahan adalah 3 Megabyte.");
+                    this.value = '';
+                    return;
+                }
+                document.getElementById('file-name-text').innerText = file.name;
+                document.getElementById('file-name-display').classList.remove('hidden');
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    selectedFileBase64 = e.target.result.split('base64,')[1];
+                    selectedFileName = file.name;
+                    selectedFileMime = file.type;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function hapusFilePDF(event) {
+            if(event) event.preventDefault();
+            document.getElementById('admin-hasil-file').value = '';
+            document.getElementById('file-name-display').classList.add('hidden');
+            selectedFileBase64 = null;
+            selectedFileName = null;
+            selectedFileMime = null;
+        }
+
+        function hapusPDFTersimpan() {
+            confirmAction("Apakah Anda yakin ingin menghapus file PDF hasil medical siswa ini?", async () => {
+                const id = document.getElementById('admin-pdf-id').value;
+                const r = state.requests.find(x => x.id == id);
+                r.pdfLink = ""; 
+                
+                document.getElementById('loader').style.display = 'flex';
+                document.getElementById('loader-text').innerHTML = "MENGHAPUS PDF DARI SISTEM...<br><span class='text-[10px] font-medium text-gray-500 tracking-normal mt-2 block'>(Mohon tunggu sebentar)</span>";
+                
+                await fetchAPI('saveRequest', r);
+                closeModal('modal-admin-pdf');
+                await refreshDataAndUI("Dokumen PDF berhasil dihapus. Status kembali menjadi Belum Mengunggah Hasil.");
+            });
+        }
+
+        async function saveAdminStatus() {
+            const idArrayRaw = document.getElementById('admin-status-ids').value;
+            if(!idArrayRaw) return;
+            const ids = JSON.parse(idArrayRaw);
+            
+            const statusVal = document.getElementById('admin-status-value').value;
+            const catatanVal = document.getElementById('admin-status-catatan').value;
+            
+            const btn = document.getElementById('btn-kirim-status');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Memproses...';
+            btn.disabled = true;
+
+            document.getElementById('loader').style.display = 'flex';
+            
+            for(let i=0; i<ids.length; i++) {
+                document.getElementById('loader-text').innerHTML = `MENYIMPAN DATA (${i+1}/${ids.length})...<br><span class='text-[10px] font-medium text-gray-500 tracking-normal mt-2 block'>(Proses massal memakan waktu, harap tunggu)</span>`;
+                
+                const r = state.requests.find(x => x.id == ids[i]);
+                if(r) {
+                    r.hasil = statusVal;
+                    r.catatan = catatanVal;
+                    await fetchAPI('saveRequest', r); 
+                }
+            }
+            
+            clearBulkSelection();
+            
+            btn.innerHTML = 'Terapkan Status';
+            btn.disabled = false;
+            closeModal('modal-admin-status');
+            
+            await refreshDataAndUI("Status medis berhasil diperbarui!");
+        }
+
+        async function saveAdminPDF() {
+            const id = document.getElementById('admin-pdf-id').value;
+            const r = state.requests.find(x => x.id == id);
+            const btn = document.getElementById('btn-kirim-pdf');
+            
+            if(!selectedFileBase64 && !deleteExistingPdf) {
+                showAlert("Peringatan", "Anda belum memilih dokumen PDF dari komputer Anda!");
+                return;
+            }
+
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Memproses...';
+            btn.disabled = true;
+            
+            if(deleteExistingPdf) {
+                r.pdfLink = ""; 
+            }
+
+            if(selectedFileBase64) {
+                r.fileData = selectedFileBase64;
+                r.fileName = `Medical_${r.nama.replace(/\s+/g, '_')}_${Date.now()}.pdf`;
+                r.mimeType = selectedFileMime;
+                
+                document.getElementById('loader').style.display = 'flex';
+                document.getElementById('loader-text').innerHTML = "ENKRIPSI & UNGGAH PDF KE DRIVE...<br><span class='text-[10px] font-medium text-gray-500 tracking-normal mt-2 block'>(Protokol cloud membutuhkan waktu 15-20 detik)</span>";
+            } else {
+                document.getElementById('loader').style.display = 'flex';
+                document.getElementById('loader-text').innerHTML = "MENGHAPUS PDF DARI DATABASE...<br><span class='text-[10px] font-medium text-gray-500 tracking-normal mt-2 block'>(Mohon tunggu sebentar)</span>";
+            }
+
+            await fetchAPI('saveRequest', r); 
+            
+            hapusFilePDF();
+            deleteExistingPdf = false;
+            
+            btn.innerHTML = 'Simpan File';
+            btn.disabled = false;
+            closeModal('modal-admin-pdf');
+            
+            await refreshDataAndUI(selectedFileBase64 ? "Dokumen PDF berhasil diunggah ke Google Drive!" : "Dokumen PDF berhasil dihapus secara permanen.");
+        }
+
+        // --- CALENDAR ---
+        function changeMonth(dir) {
+            currentCalDate.setMonth(currentCalDate.getMonth() + dir);
+            renderCalendar();
+        }
+        
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid'); grid.innerHTML = '';
+            const y = currentCalDate.getFullYear(), m = currentCalDate.getMonth();
+            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            document.getElementById('cal-month-year').innerText = `${monthNames[m]} ${y}`;
+            
+            const first = new Date(y, m, 1).getDay(), days = new Date(y, m+1, 0).getDate();
+            const today = new Date();
+            
+            for(let i=0; i<first; i++) grid.innerHTML += '<div class="bg-gray-50/50 min-h-[70px] rounded-2xl border border-transparent"></div>';
+            
+            for(let d=1; d<=days; d++) {
+                const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const list = state.requests.filter(r => r.status === 'Disetujui' && toYYYYMMDD(r.tglEst) === ds);
+                let items = '';
+                list.forEach(l => {
+                    const bgClass = l.hasil !== 'BELUM' ? 'bg-green-100 text-green-800 border-green-200' : 'bg-blue-50 text-blue-700 border-blue-100';
+                    items += `<div class="text-[9px] ${bgClass} border font-bold mb-1.5 truncate p-1.5 rounded-lg cursor-pointer hover:shadow-sm hover:-translate-y-0.5 transition-all" onclick="showCalendarDetail('${ds}')"><i class="fa-solid fa-user-tag mr-1 opacity-50"></i> ${l.nama.split(' ')[0]}</div>`
+                });
+                
+                const isToday = (d === today.getDate() && m === today.getMonth() && y === today.getFullYear()) ? 'bg-yellow-50 border-yellow-300 border-2 shadow-inner' : 'bg-white border-gray-100 border';
+
+                grid.innerHTML += `<div class="p-2 min-h-[80px] rounded-2xl flex flex-col ${isToday} hover:shadow-md transition-shadow">
+                    <p class="text-right text-[11px] font-black ${isToday.includes('yellow') ? 'text-yellow-600' : 'text-gray-400'} mb-2 shrink-0">${d}</p>
+                    <div class="overflow-y-auto flex-grow max-h-[80px] custom-scrollbar pr-1">${items}</div>
+                </div>`;
+            }
+        }
+        
+        function showCalendarDetail(d) {
+            const list = state.requests.filter(r => r.status === 'Disetujui' && toYYYYMMDD(r.tglEst) === d);
+            let txt = `<div class="text-center mb-4"><span class="bg-bglight text-primary font-black px-4 py-2 rounded-xl text-xs uppercase tracking-widest border border-gray-100"><i class="fa-regular fa-calendar mr-2"></i> ${formatTglIndo(d)}</span></div>`;
+            
+            if(list.length === 0) {
+                txt += `<div class="text-center py-6 text-gray-400 font-bold"><i class="fa-solid fa-bed text-3xl mb-2 block opacity-30"></i>Tidak ada pasien dijadwalkan.</div>`;
+            } else {
+                txt += '<div class="space-y-3">';
+                list.forEach((l, i) => {
+                    const stat = l.hasil !== 'BELUM' ? `<span class="text-green-600 font-bold"><i class="fa-solid fa-check-circle"></i> Selesai (${l.hasil})</span>` : `<span class="text-yellow-600 font-bold"><i class="fa-solid fa-clock"></i> Belum Eksekusi</span>`;
+                    txt += `
+                    <div class="bg-gray-50 border border-gray-100 p-4 rounded-2xl text-left">
+                        <div class="flex items-center mb-1">
+                            <span class="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-black mr-2 shadow-sm">${i+1}</span>
+                            <span class="font-extrabold text-gray-800 text-sm">${l.nama}</span>
+                        </div>
+                        <div class="pl-8 text-xs text-gray-500 font-medium space-y-1">
+                            <p><i class="fa-solid fa-tag w-4 opacity-50"></i> ${l.jenis}</p>
+                            <p><i class="fa-solid fa-chart-line w-4 opacity-50"></i> Status: ${stat}</p>
+                        </div>
+                    </div>`;
+                });
+                txt += '</div>';
+            }
+            showAlert("Daftar Antrean Medical", txt);
+        }
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function showAlert(t, m) { 
+            document.getElementById('alert-title').innerHTML = t; 
+            document.getElementById('alert-message').innerHTML = m; 
+            openModal('modal-alert'); 
+        }
+        function confirmAction(m, fn) { 
+            document.getElementById('confirm-message').innerHTML = m; 
+            document.getElementById('btn-confirm-yes').onclick = () => { fn(); closeModal('modal-confirm'); }; 
+            openModal('modal-confirm'); 
         }
 
     </script>
